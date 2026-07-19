@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anngg"
+version = "0.1.0"
+description = "A ggplot2-style plotting layer for scanpy AnnData objects"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Mikhael Manurung", email = "mikhael.manurung@gmail.com" }]
+keywords = ["single-cell", "anndata", "scanpy", "plotnine", "ggplot2", "visualization"]
+
+dependencies = [
+    "anndata>=0.9",
+    "scanpy>=1.9",
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "plotnine>=0.15.3,<0.17",
+    "plotnine-extra>=0.3",
+    "annplyr @ git+https://github.com/mdmanurung/annplyr",
+]
+
+[project.optional-dependencies]
+heatmap = ["PyComplexHeatmap>=1.7"]
+test = ["pytest>=7", "PyComplexHeatmap>=1.7"]
+dev = ["pytest>=7", "PyComplexHeatmap>=1.7", "ruff"]
+
+[project.urls]
+Homepage = "https://github.com/mdmanurung/anngg"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
