@@ -16,10 +16,10 @@ dependencies = [
     "anndata>=0.9",
     "scanpy>=1.9",
     "numpy>=1.23",
-    "pandas>=1.5",
+    "pandas>=2.0",
     "plotnine>=0.15.3,<0.17",
-    "plotnine-extra @ git+https://github.com/mdmanurung/plotnine-extra",
-    "annplyr @ git+https://github.com/mdmanurung/annplyr",
+    "plotnine-extra @ git+https://github.com/mdmanurung/plotnine-extra@v0.3.1",
+    "annplyr @ git+https://github.com/mdmanurung/annplyr@c0f0735859a059c3570dfea2ac6f1df322ac582e",
 ]
 
 [project.optional-dependencies]
