@@ -26,7 +26,7 @@ from plotnine import (
 from ._aggregate import tidy_expression
 from ._palette import scale_fill_obs
 from .plots import _group_categories, _order_groups, plot_dotplot, plot_matrixplot
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = [
     "plot_stacked_violin",
@@ -101,7 +101,7 @@ def plot_stacked_violin(
         + facet_grid("feature ~ .", scales="free_y")
         + scale_fill_obs(adata, group_by)
         + labs(x="", y="", fill=group_by)
-        + theme_anngg()
+        + theme_ggann()
         + theme(strip_text_y=element_text(angle=0))
         + pe.rotate_x_text(45)
     )
@@ -133,7 +133,7 @@ def plot_tracksplot(
         + facet_grid("feature ~ .", scales="free_y")
         + scale_fill_obs(adata, group_by)
         + labs(x="cells (ordered by group)", y="", fill=group_by)
-        + theme_anngg()
+        + theme_ggann()
         + theme(
             axis_text_x=element_blank(),
             axis_ticks_major_x=element_blank(),

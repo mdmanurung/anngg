@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import anngg as ag
-from anngg import aes, gganndata
-from anngg._resolve import resolve_frame, resolve_source
+import ggann as ag
+from ggann import aes, gganndata
+from ggann._resolve import resolve_frame, resolve_source
 
 
 def _no_raw(adata):

@@ -6,7 +6,7 @@ import numpy as np
 import plotnine as p9
 import pytest
 
-import anngg as ag
+import ggann as ag
 
 
 def _build(plot):

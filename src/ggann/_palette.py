@@ -1,7 +1,7 @@
-"""Reuse scanpy's stored category colours so anngg matches the rest of an analysis.
+"""Reuse scanpy's stored category colours so ggann matches the rest of an analysis.
 
 scanpy stores a per-category colour list in ``adata.uns[f"{col}_colors"]``, aligned
-to ``adata.obs[col].cat.categories``. When present, anngg picks it up so a cluster
+to ``adata.obs[col].cat.categories``. When present, ggann picks it up so a cluster
 plotted here has the same colours as ``sc.pl.umap`` of the same object.
 """
 

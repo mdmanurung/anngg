@@ -1,6 +1,6 @@
 """Aesthetic resolution: turn names into a tidy per-cell DataFrame via annplyr.
 
-Every plot in anngg is built from a plain :class:`pandas.DataFrame` that is
+Every plot in ggann is built from a plain :class:`pandas.DataFrame` that is
 extracted from the ``AnnData`` *only* through the ``adata.ap`` (annplyr)
 accessor -- no direct indexing into ``adata.X`` / ``adata.obs``. This module is
 that single extraction layer; the plotting helpers sit on top of it.

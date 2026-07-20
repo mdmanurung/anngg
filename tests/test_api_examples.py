@@ -35,7 +35,7 @@ def de_adata(adata):
 
 
 def test_every_plot_function_has_an_api_example(de_adata):
-    import anngg as ag
+    import ggann as ag
 
     documented = {
         n

@@ -28,7 +28,7 @@ from plotnine import (
 )
 
 from ._aggregate import group_means
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = ["plot_correlation"]
 
@@ -132,7 +132,7 @@ def plot_correlation(
         + _fill_scale(long["corr"], cmap)
         + coord_equal()
         + labs(x="", y="", fill=f"{method}\ncorrelation")
-        + theme_anngg()
+        + theme_ggann()
         + theme(axis_ticks=element_blank())
         + pe.rotate_x_text(45)
     )

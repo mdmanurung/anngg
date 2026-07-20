@@ -10,12 +10,12 @@ Each grammar block uses `gganndata(adata, aes(...))` to resolve names into a
 tidy `DataFrame` (its `.data`), or `adata.ap.summarize(...)` for grouped
 summaries, then stacks ordinary plotnine layers. Every twin below is built and
 checked in
-[`examples/grammar_equivalents.py`](https://github.com/mdmanurung/anngg/blob/main/examples/grammar_equivalents.py).
+[`examples/grammar_equivalents.py`](https://github.com/mdmanurung/ggann/blob/main/examples/grammar_equivalents.py).
 
 ```python
 import scanpy as sc
-import anngg as ag
-from anngg import gganndata, aes, gene
+import ggann as ag
+from ggann import gganndata, aes, gene
 from plotnine import *
 
 adata = sc.datasets.pbmc68k_reduced()
@@ -38,7 +38,7 @@ cents = base.data.groupby(group, observed=True)[[x, y]].median().reset_index()
     + geom_point(size=1.5, alpha=0.9)
     + ag.scale_color_obs(adata, group)
     + guides(color=guide_legend(override_aes={"size": 4}))
-    + ag.theme_anngg()
+    + ag.theme_ggann()
     + geom_label_repel(aes(x, y, label=group), data=cents, fill="white", inherit_aes=False)
 )
 ```
@@ -60,7 +60,7 @@ long = ...  # gganndata(...).data per gene, melted to [x, y, feature, expression
     + geom_point(size=1.2, alpha=0.9)
     + facet_wrap("~feature")
     + scale_color_cmap(cmap_name="magma")
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -84,7 +84,7 @@ long = ...  # merge mean + frac, melt to [group, feature, mean, frac]
     + geom_point(aes(size="frac", color="mean"))
     + scale_color_cmap(cmap_name="Reds")
     + scale_size(range=(0.5, 8.0), labels=lambda xs: [f"{x:.0%}" for x in xs])
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -103,7 +103,7 @@ ag.plot_matrixplot(adata, ["CD3D", "NKG7", "CST3", "GNLY"], group)
     ggplot(long, aes("feature", group, fill="mean"))
     + geom_tile()
     + scale_fill_cmap(cmap_name="viridis")
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -123,7 +123,7 @@ d = gganndata(adata, aes(group, gene("CD3D"), fill=group)).data
     ggplot(d, aes(group, "CD3D", fill=group))
     + geom_violin(scale="width")
     + ag.scale_fill_obs(adata, group)
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -143,7 +143,7 @@ ag.plot_box(adata, ["CD3D"], group)
     + geom_boxplot(width=0.7, outlier_alpha=0.0)
     + geom_jitter(width=0.2, size=0.35, alpha=0.25, stroke=0)
     + ag.scale_fill_obs(adata, group)
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -166,7 +166,7 @@ s["se"] = s["sd"] / s["n"] ** 0.5
     + geom_col(width=0.7)
     + geom_errorbar(aes(ymin="mean - se", ymax="mean + se"), width=0.3)
     + ag.scale_fill_obs(adata, group)
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -188,7 +188,7 @@ s = d.groupby(["phase", group], observed=True)["CD3D"].mean().reset_index(name="
     + geom_line()
     + geom_point(size=2)
     + ag.scale_color_obs(adata, group)
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -210,7 +210,7 @@ counts["frac"] = counts.groupby("phase", observed=True)["n"].transform(lambda x:
     ggplot(counts, aes("phase", "frac", fill=group))
     + geom_col()
     + ag.scale_fill_obs(adata, group)
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -232,7 +232,7 @@ d["density"] = calculate_density(d["CD3D"].to_numpy(float), d[[x, y]].to_numpy(f
     ggplot(d.sort_values("density"), aes(x, y, color="density"))
     + geom_point(size=1.5, alpha=0.9)
     + scale_color_cmap(cmap_name="magma")
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 
@@ -254,7 +254,7 @@ long = corr.rename_axis("row").reset_index().melt(id_vars="row", var_name="col",
     ggplot(long, aes("col", "row", fill="corr"))
     + geom_tile()
     + scale_fill_cmap(cmap_name="RdBu_r")
-    + ag.theme_anngg()
+    + ag.theme_ggann()
 )
 ```
 

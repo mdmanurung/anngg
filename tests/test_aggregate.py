@@ -1,13 +1,13 @@
 """The aggregation must match scanpy's dotplot, not merely be internally consistent.
 
-``sc.pl.dotplot`` aggregates ``adata.raw`` by default, so anngg's default
+``sc.pl.dotplot`` aggregates ``adata.raw`` by default, so ggann's default
 (``use_raw=None`` -> raw) must reproduce its ``dot_color_df`` (mean expression)
 and ``dot_size_df`` (fraction expressing).
 """
 
 import numpy as np
 
-from anngg._aggregate import aggregate_expression, expression_source
+from ggann._aggregate import aggregate_expression, expression_source
 
 
 def test_source_defaults_to_raw(adata):

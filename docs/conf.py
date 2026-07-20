@@ -9,17 +9,17 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE / "extensions"))
 
 try:
-    info = metadata("anngg")
+    info = metadata("ggann")
     project = info["Name"]
-    author = info["Author"] or "anngg developers"
+    author = info["Author"] or "ggann developers"
     version = info["Version"]
     urls = dict(pu.split(", ") for pu in info.get_all("Project-URL") or [])
-    repository_url = urls.get("Homepage", "https://github.com/mdmanurung/anngg")
+    repository_url = urls.get("Homepage", "https://github.com/mdmanurung/ggann")
 except PackageNotFoundError:
-    project = "anngg"
-    author = "anngg developers"
+    project = "ggann"
+    author = "ggann developers"
     version = "0.1.0"
-    repository_url = "https://github.com/mdmanurung/anngg"
+    repository_url = "https://github.com/mdmanurung/ggann"
 
 copyright = f"{datetime.now():%Y}, {author}."
 release = version
@@ -31,7 +31,7 @@ needs_sphinx = "4.0"
 html_context = {
     "display_github": True,
     "github_user": "mdmanurung",
-    "github_repo": "anngg",
+    "github_repo": "ggann",
     "github_version": "main",
     "conf_py_path": "/docs/",
 }

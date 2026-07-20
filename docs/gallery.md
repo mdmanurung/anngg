@@ -1,7 +1,7 @@
 # Gallery
 
 Every figure below is produced by
-[`examples/gallery.py`](https://github.com/mdmanurung/anngg/blob/main/examples/gallery.py)
+[`examples/gallery.py`](https://github.com/mdmanurung/ggann/blob/main/examples/gallery.py)
 on `pbmc68k_reduced`. The clean, boxed look emulates
 [scplotter](https://pwwang.github.io/scplotter/) / plotthis.
 

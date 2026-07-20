@@ -1,4 +1,4 @@
-"""anngg: a ggplot2-style plotting layer for scanpy AnnData objects.
+"""ggann: a ggplot2-style plotting layer for scanpy AnnData objects.
 
 The core grammar *is* plotnine. ``gganndata(adata) + aes(...) + geom_*()`` returns
 a real :class:`plotnine.ggplot`, with aesthetics resolved from ``AnnData`` through
@@ -74,11 +74,11 @@ from .theme import (
     scale_fill_expression,
     set_theme,
     sizes,
-    theme_anngg,
+    theme_ggann,
 )
 
 try:
-    __version__ = version("anngg")
+    __version__ = version("ggann")
 except PackageNotFoundError:  # pragma: no cover - not installed
     __version__ = "0.1.0"
 
@@ -115,7 +115,7 @@ __all__ = [
     "plot_expression_line",
     "plot_correlation",
     "plot_upset",
-    "theme_anngg",
+    "theme_ggann",
     "set_theme",
     "reset_theme",
     "sizes",

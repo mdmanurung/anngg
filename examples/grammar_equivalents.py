@@ -1,4 +1,4 @@
-"""The layer-by-layer plotnine grammar behind each anngg utility helper.
+"""The layer-by-layer plotnine grammar behind each ggann utility helper.
 
 Every plotnine-native ``plot_*`` helper is a thin wrapper: it resolves names
 through annplyr into a tidy ``DataFrame``, then stacks plotnine layers. Each
@@ -52,8 +52,8 @@ from plotnine import (
     scale_size,
 )
 
-import anngg as ag
-from anngg import gganndata
+import ggann as ag
+from ggann import gganndata
 
 GROUP = "bulk_labels"
 MARKERS = ["CD3D", "NKG7", "CST3", "GNLY"]
@@ -69,7 +69,7 @@ def embedding_grammar(adata, color=GROUP, basis="umap", label=True):
         + geom_point(size=1.5, alpha=0.9)
         + ag.scale_color_obs(adata, color)
         + guides(color=guide_legend(override_aes={"size": 4}))
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + theme(axis_text=element_blank(), axis_ticks=element_blank())  # arbitrary UMAP units
     )
     if label:
@@ -98,7 +98,7 @@ def features_grammar(adata, features=("CD3D", "NKG7", "CST3", "GNLY"), basis="um
         + geom_point(size=1.2, alpha=0.9)
         + pe.facet_wrap("~feature")
         + scale_color_cmap(cmap_name="magma")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
     )
 
 
@@ -118,7 +118,7 @@ def density_grammar(adata, feature="CD3D", basis="umap"):
         + geom_point(size=1.5, alpha=0.9)
         + scale_color_cmap(cmap_name="magma")
         + labs(color="density")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
     )
 
 
@@ -157,7 +157,7 @@ def dotplot_grammar(adata, genes=MARKERS, group=GROUP):
         + scale_color_cmap(cmap_name="Reds")
         + scale_size(range=(0.5, 8.0), labels=lambda xs: [f"{x:.0%}" for x in xs])
         + labs(x="", y="", color="mean\nexpression", size="fraction\nexpressing")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + pe.rotate_x_text(45)
     )
 
@@ -170,7 +170,7 @@ def matrixplot_grammar(adata, genes=MARKERS, group=GROUP):
         + geom_tile()
         + scale_fill_cmap(cmap_name="viridis")
         + labs(x="", y="", fill="mean\nexpression")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + pe.rotate_x_text(45)
     )
 
@@ -185,7 +185,7 @@ def violin_grammar(adata, gene="CD3D", group=GROUP):
         + geom_boxplot(width=0.12, fill="white", outlier_alpha=0.0, show_legend=False)
         + ag.scale_fill_obs(adata, group)
         + labs(x="", y="expression")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + pe.rotate_x_text(45)
     )
 
@@ -199,7 +199,7 @@ def box_grammar(adata, gene="CD3D", group=GROUP):
         + geom_jitter(width=0.2, height=0.0, size=0.35, alpha=0.25, stroke=0)
         + ag.scale_fill_obs(adata, group)
         + labs(x="", y="expression")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + pe.rotate_x_text(45)
     )
 
@@ -217,7 +217,7 @@ def bar_grammar(adata, gene="CD3D", group=GROUP):
         + geom_errorbar(aes(ymin="ymin", ymax="ymax"), width=0.3)
         + ag.scale_fill_obs(adata, group)
         + labs(x="", y="mean expression")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + pe.rotate_x_text(45)
     )
 
@@ -232,7 +232,7 @@ def line_grammar(adata, gene="CD3D", x="phase", group=GROUP):
         + geom_point(size=2)
         + ag.scale_color_obs(adata, group)
         + labs(x=x, y="mean expression")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
     )
 
 
@@ -247,7 +247,7 @@ def proportions_grammar(adata, group=GROUP, split="phase"):
         + geom_col()
         + ag.scale_fill_obs(adata, group)
         + labs(x="", y="proportion")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
     )
 
 
@@ -263,7 +263,7 @@ def correlation_grammar(adata, group=GROUP, n_genes=100):
         + geom_tile()
         + scale_fill_cmap(cmap_name="RdBu_r")
         + labs(x="", y="", fill="pearson\ncorrelation")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + pe.rotate_x_text(45)
     )
 

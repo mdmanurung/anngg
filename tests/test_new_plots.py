@@ -5,7 +5,7 @@ from __future__ import annotations
 import plotnine as p9
 import pytest
 
-import anngg as ag
+import ggann as ag
 
 
 def _is_ggplot(obj):

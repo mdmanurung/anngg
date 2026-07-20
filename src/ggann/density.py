@@ -4,7 +4,7 @@ Standard feature plots are hurt by dropout: many cells read zero even for real
 markers. pyNebulosa recovers the signal with a weighted 2D kernel density
 estimate over the embedding. This module reuses pyNebulosa's ``calculate_density``
 for the KDE but renders the result as an ordinary :class:`plotnine.ggplot`, so
-density plots compose with anngg's theme / scales / facets -- unlike pyNebulosa's
+density plots compose with ggann's theme / scales / facets -- unlike pyNebulosa's
 own matplotlib ``plot_density``.
 
 Expression weights are pulled through annplyr (via :func:`resolve_frame`), never
@@ -21,7 +21,7 @@ import plotnine_extra as pe
 from plotnine import aes, geom_point, ggplot, labs, scale_color_cmap
 
 from ._resolve import embedding_coords, plain_name, resolve_frame
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = ["plot_density"]
 
@@ -32,7 +32,7 @@ def _require_pynebulosa():
     except ImportError as exc:  # pragma: no cover - exercised only without the dep
         raise ImportError(
             "plot_density requires pynebulosa; install with `pip install pynebulosa` "
-            "(bundled in the anngg[density] extra)."
+            "(bundled in the ggann[density] extra)."
         ) from exc
     return calculate_density
 
@@ -141,5 +141,5 @@ def plot_density(
         + pe.facet_wrap("~feature", ncol=ncol)
         + scale_color_cmap(cmap_name=cmap)
         + labs(color="density\n(scaled)")
-        + theme_anngg()
+        + theme_ggann()
     )

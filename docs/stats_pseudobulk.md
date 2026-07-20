@@ -2,12 +2,12 @@
 
 ## ggpubr-style statistical layers
 
-Because anngg plots are ordinary plotnine objects, the full
+Because ggann plots are ordinary plotnine objects, the full
 [ggpubr](https://rpkgs.datanovia.com/ggpubr/) stat-layer family (shipped by
-`plotnine-extra`) composes onto any of them with `+`. anngg re-exports the common
-ones so you can reach them straight from `anngg`:
+`plotnine-extra`) composes onto any of them with `+`. ggann re-exports the common
+ones so you can reach them straight from `ggann`:
 
-| anngg | ggpubr | what it adds |
+| ggann | ggpubr | what it adds |
 |---|---|---|
 | `stat_compare_means` | `stat_compare_means` | global or pairwise group-comparison p-values |
 | `stat_pwc` | `stat_pwc` | pairwise comparisons with significance brackets |
@@ -19,7 +19,7 @@ ones so you can reach them straight from `anngg`:
 | `geom_signif` | (ggsignif) | significance brackets |
 
 ```python
-import anngg as ag
+import ggann as ag
 
 # correlation annotation on a QC scatter
 ag.plot_qc_scatter(adata, x="n_counts", y="n_genes") + ag.stat_cor()
@@ -37,16 +37,16 @@ ag.plot_violin(adata, ["CD3D"], "bulk_labels") + ag.stat_pwc()
 cell type) with [decoupler](https://decoupler-py.readthedocs.io/)'s
 `pp.pseudobulk` — the same aggregation the
 [liana MOFA-cellular](https://liana-py.readthedocs.io/en/latest/notebooks/mofacellular.html)
-workflow builds on. It returns a **new AnnData**, so the entire anngg grammar and
+workflow builds on. It returns a **new AnnData**, so the entire ggann grammar and
 every `plot_*` helper work on the pseudobulk object with **no changes** — you just
 point them at `pb` instead of `adata`:
 
 ```python
-import anngg as ag
-from anngg import gganndata, aes, gene
+import ggann as ag
+from ggann import gganndata, aes, gene
 from plotnine import geom_boxplot
 
-# cells -> sample x cell-type pseudobulk profiles (needs anngg[pseudobulk])
+# cells -> sample x cell-type pseudobulk profiles (needs ggann[pseudobulk])
 pb = ag.pseudobulk(adata, sample_col="donor", group_by="cell_type",
                    layer="counts", mode="sum")
 

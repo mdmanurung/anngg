@@ -1,7 +1,7 @@
 """Generate the README gallery figures into ``docs/images/``.
 
 Run: ``python examples/gallery.py`` (writes committed PNGs referenced by README).
-Covers the full anngg surface on ``pbmc68k_reduced``.
+Covers the full ggann surface on ``pbmc68k_reduced``.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ matplotlib.use("Agg")
 
 import scanpy as sc
 
-import anngg as ag
+import ggann as ag
 
 HERE = os.path.dirname(__file__)
 OUT = os.path.join(HERE, "..", "docs", "images")

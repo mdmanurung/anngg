@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "anngg"
+name = "ggann"
 version = "0.1.0"
 description = "A ggplot2-style plotting layer for scanpy AnnData objects"
 readme = "README.md"
@@ -41,7 +41,7 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mdmanurung/anngg"
+Homepage = "https://github.com/mdmanurung/ggann"
 
 [tool.setuptools.packages.find]
 where = ["src"]

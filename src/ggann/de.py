@@ -13,7 +13,7 @@ import plotnine_extra as pe
 from plotnine import labs, scale_color_manual
 
 from .plots import plot_dotplot, plot_matrixplot
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 # Conventional volcano colours: down = blue, non-significant = grey, up = red.
 # Keys must match the categories ``plotnine_extra.ggvolcano`` maps to its colour
@@ -116,5 +116,5 @@ def plot_volcano(
         )
         + scale_color_manual(values=_VOLCANO_COLORS)
         + labs(x="log2 fold change", y="-log10(adjusted p-value)")
-        + theme_anngg()
+        + theme_ggann()
     )

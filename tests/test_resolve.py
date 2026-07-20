@@ -3,8 +3,8 @@ import warnings
 import pandas as pd
 import pytest
 
-from anngg import gene, obs
-from anngg._resolve import embedding_coords, embedding_key, resolve_frame
+from ggann import gene, obs
+from ggann._resolve import embedding_coords, embedding_key, resolve_frame
 
 
 def test_resolve_obs_and_gene(adata, group_key):
