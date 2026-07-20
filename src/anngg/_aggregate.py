@@ -20,7 +20,7 @@ import pandas as pd
 
 from ._resolve import _densify, resolve_source
 
-__all__ = ["aggregate_expression", "expression_source", "tidy_expression"]
+__all__ = ["aggregate_expression", "expression_source", "group_means", "tidy_expression"]
 
 StandardScale = Literal["var", "group", "zscore"]
 
@@ -50,6 +50,24 @@ def expression_source(adata, layer: str | None, use_raw: bool | None) -> tuple[s
     on ``use_raw=True`` with no ``adata.raw``, or ``layer`` + ``use_raw=True``).
     """
     return resolve_source(adata, layer, use_raw)
+
+
+def group_means(
+    adata, genes: Iterable[str], group_by: str, *, layer=None, use_raw=None
+) -> pd.DataFrame:
+    """Mean expression per group (index) per gene (columns), mean-only.
+
+    Like :func:`aggregate_expression` but skips the fraction-expressing pass, for
+    callers (e.g. :func:`anngg.plot_correlation`) that only need the group means.
+    """
+    genes = list(genes)
+    kind, lyr = expression_source(adata, layer, use_raw)
+    mean_expr = {g: ap.mean(ap.col(g)) for g in genes}
+    if kind == "raw":
+        mean_df = adata.ap.summarize(raw=mean_expr, by=group_by)
+    else:
+        mean_df = adata.ap.summarize(x=mean_expr, by=group_by, layer=lyr)
+    return _densify(mean_df).set_index(group_by)[genes].astype(float)
 
 
 def _standardize(mean_df: pd.DataFrame, standard_scale: str | None) -> pd.DataFrame:

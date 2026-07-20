@@ -29,7 +29,7 @@ from plotnine import (
 
 from ._aggregate import tidy_expression
 from ._palette import scale_color_obs, scale_fill_obs
-from ._resolve import _densify, plain_name, resolve_frame
+from ._resolve import plain_name, resolve_frame
 from .plots import _group_categories, _is_numeric, _order_groups
 from .theme import theme_anngg
 
@@ -160,10 +160,17 @@ def plot_expression_line(
     xname = plain_name(adata, x)
     gname = plain_name(adata, group_by) if group_by is not None else None
 
-    cols = [x] + ([group_by] if group_by is not None else []) + list(genes)
-    frame = _densify(resolve_frame(adata, cols, layer=layer, use_raw=use_raw))
     gene_names = [plain_name(adata, g) for g in genes]
     id_vars = [xname] + ([gname] if gname is not None else [])
+    clash = set(gene_names) & set(id_vars)
+    if clash:
+        raise ValueError(
+            f"feature name(s) {sorted(clash)} collide with x/group_by; melt would drop them. "
+            f"Rename, or disambiguate with gene()/obs()."
+        )
+
+    cols = [x] + ([group_by] if group_by is not None else []) + list(genes)
+    frame = resolve_frame(adata, cols, layer=layer, use_raw=use_raw)  # already densified
     long = frame.melt(id_vars=id_vars, value_vars=gene_names, var_name="feature", value_name="value")
     long["feature"] = pd.Categorical(long["feature"], categories=gene_names, ordered=True)
 
