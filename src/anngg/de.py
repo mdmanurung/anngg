@@ -16,6 +16,8 @@ from .plots import plot_dotplot, plot_matrixplot
 from .theme import theme_anngg
 
 # Conventional volcano colours: down = blue, non-significant = grey, up = red.
+# Keys must match the categories ``plotnine_extra.ggvolcano`` maps to its colour
+# aesthetic; unused keys are ignored, so a one-sided result (only "up") is fine.
 _VOLCANO_COLORS = {"down": "#3B4CC0", "not significant": "#B8B8B8", "up": "#B40426"}
 
 __all__ = [

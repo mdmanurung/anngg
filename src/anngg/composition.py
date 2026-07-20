@@ -54,7 +54,8 @@ def plot_proportions(
         ylab = "proportion of cells"
     else:
         counts["value"] = counts["n"]
-        ylab = "number of cells"
+        # geom_col(position="fill") re-normalizes to 0..1 regardless of the counts
+        ylab = "proportion of cells" if position == "fill" else "number of cells"
 
     counts = _order_groups(
         counts, group_by, categories_order or _group_categories(adata, group_by)

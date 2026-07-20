@@ -97,7 +97,16 @@ def plot_density(
     missing = [f for f, n in zip(features, names) if n not in values.columns]
     if missing:
         raise KeyError(f"Could not resolve feature(s) {missing} as genes or obs columns.")
+    non_numeric = [
+        f for f, n in zip(features, names) if not pd.api.types.is_numeric_dtype(values[n])
+    ]
+    if non_numeric:
+        raise TypeError(
+            f"plot_density needs numeric features (genes or continuous obs); "
+            f"{non_numeric} are non-numeric. Use plot_embedding for categorical colours."
+        )
 
+    panels = list(dict.fromkeys(names))
     raw_density = {
         name: np.asarray(
             calculate_density(
@@ -108,11 +117,9 @@ def plot_density(
             ),
             dtype=float,
         )
-        for name in dict.fromkeys(names)
+        for name in panels
     }
-
-    panels = list(dict.fromkeys(names))
-    panel_density = {name: raw_density[name] for name in panels}
+    panel_density = dict(raw_density)
     if joint and len(panels) > 1:
         joint_label = " + ".join(panels)
         panel_density[joint_label] = np.prod([raw_density[n] for n in panels], axis=0)

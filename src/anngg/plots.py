@@ -8,6 +8,7 @@ composable with ``+ scale_*`` / ``+ theme(...)`` / ``+ facet_*``.
 
 from __future__ import annotations
 
+import warnings
 from typing import Iterable, Sequence
 
 import pandas as pd
@@ -58,9 +59,17 @@ def _embedding_axes():
     return theme(axis_text=element_blank(), axis_ticks=element_blank())
 
 
-def _centroid_labels(df: pd.DataFrame, cname: str, xcol: str, ycol: str) -> pd.DataFrame:
-    """Median position of each category, for placing a cluster label at its centre."""
-    cents = df.groupby(cname, observed=True)[[xcol, ycol]].median().reset_index()
+def _centroid_labels(
+    df: pd.DataFrame, cname: str, xcol: str, ycol: str, split_by: str | None = None
+) -> pd.DataFrame:
+    """Median position of each category, for placing a cluster label at its centre.
+
+    When ``split_by`` is given the centroids are computed *within* each facet, so a
+    label lands where its category actually sits in that panel rather than at the
+    pooled median (which would be broadcast to every facet).
+    """
+    keys = [cname] if split_by is None else [split_by, cname]
+    cents = df.groupby(keys, observed=True)[[xcol, ycol]].median().reset_index()
     return cents.rename(columns={cname: "label"})
 
 
@@ -107,6 +116,13 @@ def plot_embedding(
     def _facet(plot):
         return plot + pe.facet_wrap("~" + split_by) if split_by is not None else plot
 
+    if label and color is None:
+        warnings.warn(
+            "plot_embedding: label=True is ignored when color is None "
+            "(centroid labels need a categorical color).",
+            stacklevel=2,
+        )
+
     if color is None:
         if pointdensity is None:
             pointdensity = True
@@ -135,6 +151,12 @@ def plot_embedding(
         df = df.join(split_col)
 
     if _is_numeric(df[cname]):
+        if label:
+            warnings.warn(
+                f"plot_embedding: label=True is ignored for the numeric color {color!r} "
+                "(centroid labels need a categorical color).",
+                stacklevel=2,
+            )
         # Draw low-expression cells first so high-expression cells are not occluded
         # (mirrors scanpy's sc.pl.embedding ordering).
         df = df.sort_values(cname)
@@ -154,7 +176,7 @@ def plot_embedding(
         + _embedding_axes()
     )
     if label:
-        cents = _centroid_labels(df, cname, xcol, ycol)
+        cents = _centroid_labels(df, cname, xcol, ycol, split_by=split_by)
         # white-backed repelled labels at centroids, like scplotter's label_bg="white"
         plot = plot + pe.geom_label_repel(
             aes(xcol, ycol, label="label"),
@@ -362,10 +384,11 @@ def plot_violin(
         categories_order = _group_categories(adata, group_by)
     tidy = _order_groups(tidy, group_by, categories_order)
     plot = ggplot(tidy, aes(group_by, "value", fill=group_by)) + geom_violin(scale=scale)
-    if add_points:
-        plot = plot + geom_jitter(width=0.2, height=0.0, size=0.3, alpha=0.25, stroke=0)
+    # box first, then points on top -- otherwise the white box occludes the jitter
     if add_box:
         plot = plot + geom_boxplot(width=0.12, fill="white", outlier_alpha=0.0, show_legend=False)
+    if add_points:
+        plot = plot + geom_jitter(width=0.2, height=0.0, size=0.3, alpha=0.25, stroke=0)
     plot = (
         plot
         + pe.facet_wrap("~feature", ncol=ncol, scales="free_y")
