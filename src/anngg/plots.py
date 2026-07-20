@@ -44,6 +44,12 @@ def _is_numeric(series: pd.Series) -> bool:
     )
 
 
+def _centroid_labels(df: pd.DataFrame, cname: str, xcol: str, ycol: str) -> pd.DataFrame:
+    """Median position of each category, for placing a cluster label at its centre."""
+    cents = df.groupby(cname, observed=True)[[xcol, ycol]].median().reset_index()
+    return cents.rename(columns={cname: "label"})
+
+
 def plot_embedding(
     adata,
     basis: str = "umap",
@@ -55,6 +61,8 @@ def plot_embedding(
     size: float = 1.5,
     alpha: float = 0.9,
     pointdensity: bool | None = None,
+    label: bool = False,
+    label_size: float = 9,
     low: str = "#d9d9d9",
     high: str = "#2166ac",
 ):
@@ -66,6 +74,9 @@ def plot_embedding(
       (reusing scanpy's stored palette when present).
     * numeric ``color`` (a gene or continuous obs column) -> a gradient.
     * ``split_by`` -> facet the scatter over an obs column (Seurat ``split.by``).
+    * ``label=True`` -> for a categorical ``color``, print each category at its
+      centroid using repelled (non-overlapping) text, like scplotter's
+      ``CellDimPlot`` / Seurat ``label=TRUE``.
     """
     coords = embedding_coords(adata, basis)
     if coords.shape[1] < 2:
@@ -114,11 +125,22 @@ def plot_embedding(
             )
             + theme_anngg()
         )
-    return _facet(
+    plot = (
         pe.DimPlot(df, x=xcol, y=ycol, color=cname, size=size, alpha=alpha)
         + scale_color_obs(adata, cname)
         + theme_anngg()
     )
+    if label:
+        cents = _centroid_labels(df, cname, xcol, ycol)
+        plot = plot + pe.geom_text_repel(
+            aes(xcol, ycol, label="label"),
+            data=cents,
+            size=label_size,
+            fontweight="bold",
+            color="black",
+            inherit_aes=False,
+        )
+    return _facet(plot)
 
 
 def plot_features(

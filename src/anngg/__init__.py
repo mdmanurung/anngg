@@ -11,12 +11,22 @@ from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version
 
-from plotnine_extra import Beside, Stack, Wrap, ggsave, plot_annotation, plot_layout
+from plotnine_extra import (
+    Beside,
+    Stack,
+    Wrap,
+    geom_label_repel,
+    geom_text_repel,
+    ggsave,
+    plot_annotation,
+    plot_layout,
+)
 
 from ._palette import obs_colors, scale_color_obs, scale_colour_obs, scale_fill_obs
 from ._resolve import embedding_coords, gene, obs, obsm
 from .clustermap import plot_clustermap
 from .composition import plot_proportions
+from .correlation import plot_correlation
 from .de import (
     plot_rank_genes_dotplot,
     plot_rank_genes_heatmap,
@@ -24,6 +34,8 @@ from .de import (
     plot_volcano,
     rank_genes_df,
 )
+from .density import plot_density
+from .distributions import plot_box, plot_expression_bar, plot_expression_line
 from .grammar import aes, gganndata
 from .markers import (
     plot_dotplot_grouped,
@@ -80,6 +92,11 @@ __all__ = [
     "plot_qc_violin",
     "plot_qc_scatter",
     "plot_highest_expr_genes",
+    "plot_density",
+    "plot_box",
+    "plot_expression_bar",
+    "plot_expression_line",
+    "plot_correlation",
     "theme_anngg",
     "scale_color_expression",
     "scale_colour_expression",
@@ -96,6 +113,8 @@ __all__ = [
     "Wrap",
     "plot_layout",
     "plot_annotation",
+    "geom_text_repel",
+    "geom_label_repel",
     "ggsave",
     "__version__",
 ]
