@@ -16,6 +16,7 @@ from plotnine import (
     aes,
     element_blank,
     geom_boxplot,
+    geom_jitter,
     geom_point,
     geom_tile,
     geom_violin,
@@ -343,6 +344,7 @@ def plot_violin(
     ncol: int = 1,
     scale: str = "width",
     add_box: bool = True,
+    add_points: bool = False,
     stats: bool = False,
     categories_order: Iterable[str] | None = None,
 ):
@@ -350,8 +352,9 @@ def plot_violin(
 
     ``add_box=True`` (default) nests a slim white boxplot inside each violin so the
     median and quartiles read off cleanly, the way scplotter's ``FeatureStatPlot``
-    does. Set ``stats=True`` to overlay a group-comparison test via plotnine-extra's
-    ``stat_compare_means``.
+    does. ``add_points=True`` overlays the individual cells as jitter (scplotter's
+    ``add_point``). Set ``stats=True`` to overlay a group-comparison test via
+    plotnine-extra's ``stat_compare_means``.
     """
     genes = list(genes)
     tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw)
@@ -359,6 +362,8 @@ def plot_violin(
         categories_order = _group_categories(adata, group_by)
     tidy = _order_groups(tidy, group_by, categories_order)
     plot = ggplot(tidy, aes(group_by, "value", fill=group_by)) + geom_violin(scale=scale)
+    if add_points:
+        plot = plot + geom_jitter(width=0.2, height=0.0, size=0.3, alpha=0.25, stroke=0)
     if add_box:
         plot = plot + geom_boxplot(width=0.12, fill="white", outlier_alpha=0.0, show_legend=False)
     plot = (
