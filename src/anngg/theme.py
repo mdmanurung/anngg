@@ -8,7 +8,7 @@ objects the user can override with any ``+ theme(...)`` / ``+ scale_*``.
 from __future__ import annotations
 
 import plotnine_extra as pe
-from plotnine import element_blank, element_line, element_text, theme, theme_classic
+from plotnine import element_blank, element_line, element_rect, element_text, theme, theme_bw
 
 __all__ = [
     "theme_anngg",
@@ -22,13 +22,20 @@ __all__ = [
 
 
 def theme_anngg(base_size: float = 11, base_family: str | None = None):
-    """A clean, axis-forward theme suited to embeddings, dotplots and violins."""
-    return theme_classic(base_size=base_size, base_family=base_family) + theme(
-        axis_text=element_text(color="black"),
+    """A clean, boxed theme emulating scplotter / plotthis ``theme_this``.
+
+    The signature scplotter look is a thin black panel border (a full box) with
+    no axis lines and no grid -- not the L-shaped axes of ``theme_classic``.
+    """
+    return theme_bw(base_size=base_size, base_family=base_family) + theme(
+        panel_grid=element_blank(),
+        panel_border=element_rect(color="black", fill=None, size=1),
+        axis_line=element_blank(),
         axis_ticks=element_line(color="black"),
+        axis_text=element_text(color="black"),
         legend_key=element_blank(),
         strip_background=element_blank(),
-        strip_text=element_text(weight="bold"),
+        strip_text=element_text(color="black"),
     )
 
 

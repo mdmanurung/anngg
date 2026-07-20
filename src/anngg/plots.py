@@ -18,6 +18,8 @@ from plotnine import (
     geom_tile,
     geom_violin,
     ggplot,
+    guide_legend,
+    guides,
     labs,
     scale_color_cmap,
     scale_fill_cmap,
@@ -128,15 +130,18 @@ def plot_embedding(
     plot = (
         pe.DimPlot(df, x=xcol, y=ycol, color=cname, size=size, alpha=alpha)
         + scale_color_obs(adata, cname)
+        # enlarge the legend swatches so categories stay readable (scplotter does this)
+        + guides(color=guide_legend(override_aes={"size": 4}))
         + theme_anngg()
     )
     if label:
         cents = _centroid_labels(df, cname, xcol, ycol)
-        plot = plot + pe.geom_text_repel(
+        # white-backed repelled labels at centroids, like scplotter's label_bg="white"
+        plot = plot + pe.geom_label_repel(
             aes(xcol, ycol, label="label"),
             data=cents,
-            size=label_size,
-            fontweight="bold",
+            size=label_size * 0.85,
+            fill="white",
             color="black",
             inherit_aes=False,
         )
