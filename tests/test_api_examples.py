@@ -26,10 +26,12 @@ _NON_FIGURE = {"plot_annotation", "plot_layout", "plot_rank_genes_heatmap"}
 def de_adata(adata):
     import scanpy as sc
 
-    # recompute unconditionally: the shared session adata may carry a
-    # rank_genes_groups from another test computed without p-value columns
-    sc.tl.rank_genes_groups(adata, "bulk_labels", method="wilcoxon", n_genes=50)
-    return adata
+    # work on a COPY: pbmc68k_reduced ships a logreg rank_genes_groups (no
+    # p-values) that another test asserts on; recompute wilcoxon here without
+    # mutating the shared session fixture.
+    ad = adata.copy()
+    sc.tl.rank_genes_groups(ad, "bulk_labels", method="wilcoxon", n_genes=50)
+    return ad
 
 
 def test_every_plot_function_has_an_api_example(de_adata):
