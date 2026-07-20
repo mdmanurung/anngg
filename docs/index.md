@@ -66,6 +66,7 @@ Look up the grammar, helpers, scales and theme.
 installation
 quickstart
 gallery
+comparisons
 ```
 
 ```{toctree}

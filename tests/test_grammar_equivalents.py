@@ -27,14 +27,29 @@ def test_grammar_equivalent_builds(adata, name, builder):
     plot._build()  # force layout so any layer mismatch surfaces here
 
 
+@pytest.mark.parametrize("name", list(ge.HELPERS))
+def test_comparison_helper_builds(adata, name):
+    # each grammar twin is paired with the one-line helper it reproduces
+    plot = ge.HELPERS[name](adata)
+    assert isinstance(plot, p9.ggplot)
+    plot._build()
+
+
 def test_every_plotnine_utility_has_a_grammar_equivalent():
     expected = {
         "plot_embedding",
+        "plot_features",
         "plot_density",
+        "plot_dotplot",
+        "plot_matrixplot",
+        "plot_violin",
         "plot_box",
         "plot_expression_bar",
         "plot_expression_line",
+        "plot_proportions",
         "plot_correlation",
     }
     missing = expected - set(ge.EQUIVALENTS)
     assert not missing, f"utilities lacking a grammar equivalent: {sorted(missing)}"
+    # every grammar twin must have a paired helper for the side-by-side comparison
+    assert set(ge.EQUIVALENTS) == set(ge.HELPERS)
