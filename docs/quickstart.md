@@ -45,6 +45,20 @@ Each plotnine-native helper is only a stack of grammar layers — see
 [`examples/grammar_equivalents.py`](https://github.com/mdmanurung/anngg/blob/main/examples/grammar_equivalents.py)
 for the layer-by-layer twin of every helper.
 
+## One consistent look
+
+Call `ag.set_theme()` once to make the anngg theme plotnine's default, so every
+figure — even a bare `ggplot(...)` — shares it without `+ theme_anngg()`:
+
+```python
+ag.set_theme(base_size=9, family="Arial")   # family is optional; no font is required
+gganndata(adata, aes("UMAP_1", "UMAP_2", color="louvain")) + geom_point()  # already themed
+```
+
+`ag.sizes` gives a matching font-size scale (`.normal`/`.small`/`.large`/`.title`,
+in pt) so text in annotations stays in sync — convert to `geom_text`'s mm unit with
+`ag.sizes.geom(...)`. `ag.reset_theme()` restores plotnine's default.
+
 ## Composing panels
 
 `anngg` re-exports plotnine-extra's layout operators, so multi-panel figures

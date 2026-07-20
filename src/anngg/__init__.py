@@ -64,12 +64,15 @@ from .qc import plot_highest_expr_genes, plot_qc_scatter, plot_qc_violin
 from .ridge import plot_ridge
 from .upset import plot_upset
 from .theme import (
+    reset_theme,
     scale_color_celltype,
     scale_color_expression,
     scale_colour_celltype,
     scale_colour_expression,
     scale_fill_celltype,
     scale_fill_expression,
+    set_theme,
+    sizes,
     theme_anngg,
 )
 
@@ -112,6 +115,9 @@ __all__ = [
     "plot_correlation",
     "plot_upset",
     "theme_anngg",
+    "set_theme",
+    "reset_theme",
+    "sizes",
     "scale_color_expression",
     "scale_colour_expression",
     "scale_fill_expression",
