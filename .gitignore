@@ -19,3 +19,4 @@ examples/_phase1/
 docs/_build/
 docs/generated/
 !docs/images/compare/*.png
+!docs/images/scplotter/*.png
