@@ -26,8 +26,9 @@ dependencies = [
 heatmap = ["PyComplexHeatmap>=1.7"]
 density = ["pynebulosa>=0.1.1"]
 upset = ["marsilea>=0.4"]
-test = ["pytest>=7", "PyComplexHeatmap>=1.7", "pynebulosa>=0.1.1", "marsilea>=0.4"]
-dev = ["pytest>=7", "PyComplexHeatmap>=1.7", "pynebulosa>=0.1.1", "marsilea>=0.4", "ruff"]
+pseudobulk = ["decoupler>=2.0"]
+test = ["pytest>=7", "PyComplexHeatmap>=1.7", "pynebulosa>=0.1.1", "marsilea>=0.4", "decoupler>=2.0"]
+dev = ["pytest>=7", "PyComplexHeatmap>=1.7", "pynebulosa>=0.1.1", "marsilea>=0.4", "decoupler>=2.0", "ruff"]
 docs = [
     "sphinx>=8.1",
     "sphinx-book-theme>=1",
