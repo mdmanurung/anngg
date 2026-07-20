@@ -2,6 +2,8 @@
 
 **A ggplot2-style plotting layer for scanpy `AnnData` objects.**
 
+📖 **[Documentation](https://mdmanurung.github.io/anngg/)** — API reference, quickstart and gallery.
+
 `anngg` gives single-cell users the grammar of graphics over an `AnnData`, the
 way `ggplot2` works in R. It is conceptually the same idea as scanpy's
 [plotting-with-marsilea](https://scanpy.readthedocs.io/en/stable/how-to/plotting-with-marsilea.html)

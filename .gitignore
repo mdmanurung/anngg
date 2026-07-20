@@ -14,3 +14,7 @@ examples/_phase1/
 !examples/_output/.gitkeep
 !docs/images/*.png
 .ipynb_checkpoints/
+
+# Sphinx docs build artifacts
+docs/_build/
+docs/generated/

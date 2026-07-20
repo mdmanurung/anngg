@@ -1,0 +1,7 @@
+/* anngg docs — minor tweaks over sphinx_book_theme */
+.bd-main .bd-content .bd-article-container {
+  max-width: 60rem;
+}
+img {
+  max-width: 100%;
+}

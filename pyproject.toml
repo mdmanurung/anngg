@@ -28,6 +28,16 @@ density = ["pynebulosa>=0.1.1"]
 upset = ["marsilea>=0.4"]
 test = ["pytest>=7", "PyComplexHeatmap>=1.7", "pynebulosa>=0.1.1", "marsilea>=0.4"]
 dev = ["pytest>=7", "PyComplexHeatmap>=1.7", "pynebulosa>=0.1.1", "marsilea>=0.4", "ruff"]
+docs = [
+    "sphinx>=8.1",
+    "sphinx-book-theme>=1",
+    "sphinx-autodoc-typehints",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinxext-opengraph",
+    "myst-nb>=1.1",
+    "ipython",
+]
 
 [project.urls]
 Homepage = "https://github.com/mdmanurung/anngg"
