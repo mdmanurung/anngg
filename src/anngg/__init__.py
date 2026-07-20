@@ -16,10 +16,19 @@ from plotnine_extra import (
     Stack,
     Wrap,
     geom_label_repel,
+    geom_signif,
     geom_text_repel,
     ggsave,
     plot_annotation,
     plot_layout,
+    stat_anova_test,
+    stat_central_tendency,
+    stat_compare_means,
+    stat_cor,
+    stat_kruskal_test,
+    stat_pvalue_manual,
+    stat_pwc,
+    stat_regline_equation,
 )
 
 from ._palette import obs_colors, scale_color_obs, scale_colour_obs, scale_fill_obs
@@ -50,6 +59,7 @@ from .plots import (
     plot_matrixplot,
     plot_violin,
 )
+from .pseudobulk import pseudobulk
 from .qc import plot_highest_expr_genes, plot_qc_scatter, plot_qc_violin
 from .ridge import plot_ridge
 from .upset import plot_upset
@@ -119,6 +129,16 @@ __all__ = [
     "plot_annotation",
     "geom_text_repel",
     "geom_label_repel",
+    "pseudobulk",
+    "stat_compare_means",
+    "stat_pwc",
+    "stat_pvalue_manual",
+    "stat_cor",
+    "stat_regline_equation",
+    "stat_anova_test",
+    "stat_kruskal_test",
+    "stat_central_tendency",
+    "geom_signif",
     "ggsave",
     "__version__",
 ]

@@ -89,6 +89,25 @@ The grammar entry point and the aesthetic-resolution escapes.
    plot_upset
 ```
 
+## Pseudobulk & stats
+
+```{eval-rst}
+.. autosummary::
+   :toctree: generated
+   :nosignatures:
+
+   pseudobulk
+   stat_compare_means
+   stat_pwc
+   stat_pvalue_manual
+   stat_cor
+   stat_regline_equation
+   stat_anova_test
+   stat_kruskal_test
+   stat_central_tendency
+   geom_signif
+```
+
 ## Quality control
 
 ```{eval-rst}
