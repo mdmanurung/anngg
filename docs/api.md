@@ -140,6 +140,8 @@ The grammar entry point and the aesthetic-resolution escapes.
    scale_fill_celltype
    geom_text_repel
    geom_label_repel
+   compose
+   tag_panels
    Wrap
    Stack
    Beside
