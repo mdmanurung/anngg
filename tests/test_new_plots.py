@@ -79,3 +79,14 @@ def test_repel_geoms_exported():
     # ggrepel-style non-overlapping labels, re-exported from plotnine-extra
     assert callable(ag.geom_text_repel)
     assert callable(ag.geom_label_repel)
+
+
+def test_plot_upset(adata):
+    genes = list(adata.raw.var_names[:30])
+    upset = ag.plot_upset({"A": genes[:20], "B": genes[10:30], "C": genes[5:15]}, min_cardinality=1)
+    assert upset.figure is not None
+
+
+def test_plot_upset_needs_two_sets(adata):
+    with pytest.raises(ValueError):
+        ag.plot_upset({"only": ["a", "b"]})

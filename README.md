@@ -52,12 +52,28 @@ estimation on the embedding; `joint=True` adds a co-expression panel.
 ag.plot_density(adata, ["CD3D", "NKG7"], basis="umap", joint=True)
 ```
 
-Other additions inspired by [scplotter](https://pwwang.github.io/scplotter/),
-[DOTools](https://dotools-py.readthedocs.io/) and
-[marsilea](https://marsilea.readthedocs.io/): `plot_box`, `plot_expression_bar`,
+### Set intersections ([marsilea](https://marsilea.readthedocs.io/))
+
+`plot_upset` draws an UpSet plot — e.g. which top marker genes are shared across
+cell types (the modern replacement for a Venn diagram).
+
+![UpSet](docs/images/upset.png)
+
+```python
+de = ag.rank_genes_df(adata)
+sets = {g: list(de[de["group"] == g].head(20)["names"]) for g in cell_types}
+ag.plot_upset(sets, min_cardinality=1)
+```
+
+Other additions inspired by [scplotter](https://pwwang.github.io/scplotter/) and
+[DOTools](https://dotools-py.readthedocs.io/): `plot_box`, `plot_expression_bar`,
 `plot_expression_line`, `plot_correlation`, and re-exported `geom_text_repel` /
 `geom_label_repel` ([ggrepel](https://github.com/slowkow/ggrepel)-style
 non-overlapping labels, via `plotnine-extra`).
+
+`plot_density` (pyNebulosa) and `plot_upset` (marsilea) use optional
+dependencies — install them with `pip install anngg[density]` /
+`anngg[upset]`.
 
 ## Design philosophy
 
