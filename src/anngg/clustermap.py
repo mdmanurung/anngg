@@ -94,6 +94,13 @@ def plot_clustermap(
 
     top_annotation = None
     if ann_df is not None and not ann_df.empty:
+        # pandas>=3 gives string columns the `str` dtype, which PyComplexHeatmap
+        # does not recognise as categorical and then refuses to auto-pick a cmap.
+        # Coerce non-numeric annotations to `category` so it colours them discretely.
+        ann_df = ann_df.copy()
+        for col in ann_df.columns:
+            if not pd.api.types.is_numeric_dtype(ann_df[col]):
+                ann_df[col] = ann_df[col].astype("category")
         top_annotation = pch.HeatmapAnnotation(df=ann_df, axis=1, plot_legend=True)
 
     return pch.ClusterMapPlotter(
