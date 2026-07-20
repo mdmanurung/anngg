@@ -67,6 +67,7 @@ installation
 quickstart
 gallery
 comparisons
+scplotter_parity
 ```
 
 ```{toctree}
