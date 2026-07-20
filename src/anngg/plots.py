@@ -14,6 +14,8 @@ import pandas as pd
 import plotnine_extra as pe
 from plotnine import (
     aes,
+    element_blank,
+    geom_boxplot,
     geom_point,
     geom_tile,
     geom_violin,
@@ -24,6 +26,7 @@ from plotnine import (
     scale_color_cmap,
     scale_fill_cmap,
     scale_size,
+    theme,
 )
 
 from ._aggregate import aggregate_expression, tidy_expression
@@ -44,6 +47,14 @@ def _is_numeric(series: pd.Series) -> bool:
     return pd.api.types.is_numeric_dtype(series) and not isinstance(
         series.dtype, pd.CategoricalDtype
     )
+
+
+def _embedding_axes():
+    """Hide the tick numbers on embeddings -- UMAP/t-SNE units are arbitrary,
+
+    so the numbers are noise (scplotter's ``CellDimPlot`` / Seurat drop them too).
+    """
+    return theme(axis_text=element_blank(), axis_ticks=element_blank())
 
 
 def _centroid_labels(df: pd.DataFrame, cname: str, xcol: str, ycol: str) -> pd.DataFrame:
@@ -105,8 +116,13 @@ def plot_embedding(
                 + pe.geom_pointdensity(size=size, alpha=alpha)
                 + labs(color="density")
                 + theme_anngg()
+                + _embedding_axes()
             )
-        return _facet(pe.DimPlot(base, x=xcol, y=ycol, size=size, alpha=alpha) + theme_anngg())
+        return _facet(
+            pe.DimPlot(base, x=xcol, y=ycol, size=size, alpha=alpha)
+            + theme_anngg()
+            + _embedding_axes()
+        )
 
     # `color` may be a bare name, a prefix string ("gene:CD3D@logcounts") or an accessor
     cname = plain_name(adata, color)
@@ -126,6 +142,7 @@ def plot_embedding(
                 df, feature=cname, x=xcol, y=ycol, low=low, high=high, size=size, alpha=alpha
             )
             + theme_anngg()
+            + _embedding_axes()
         )
     plot = (
         pe.DimPlot(df, x=xcol, y=ycol, color=cname, size=size, alpha=alpha)
@@ -133,6 +150,7 @@ def plot_embedding(
         # enlarge the legend swatches so categories stay readable (scplotter does this)
         + guides(color=guide_legend(override_aes={"size": 4}))
         + theme_anngg()
+        + _embedding_axes()
     )
     if label:
         cents = _centroid_labels(df, cname, xcol, ycol)
@@ -191,6 +209,7 @@ def plot_features(
         + pe.facet_wrap("~feature", ncol=ncol)
         + scale_color_cmap(cmap_name=cmap)
         + theme_anngg()
+        + _embedding_axes()
     )
 
 
@@ -323,12 +342,15 @@ def plot_violin(
     use_raw: bool | None = None,
     ncol: int = 1,
     scale: str = "width",
+    add_box: bool = True,
     stats: bool = False,
     categories_order: Iterable[str] | None = None,
 ):
     """Per-group expression distributions, one facet per gene (stacked-violin style).
 
-    Set ``stats=True`` to overlay a group-comparison test via plotnine-extra's
+    ``add_box=True`` (default) nests a slim white boxplot inside each violin so the
+    median and quartiles read off cleanly, the way scplotter's ``FeatureStatPlot``
+    does. Set ``stats=True`` to overlay a group-comparison test via plotnine-extra's
     ``stat_compare_means``.
     """
     genes = list(genes)
@@ -336,9 +358,11 @@ def plot_violin(
     if categories_order is None:
         categories_order = _group_categories(adata, group_by)
     tidy = _order_groups(tidy, group_by, categories_order)
+    plot = ggplot(tidy, aes(group_by, "value", fill=group_by)) + geom_violin(scale=scale)
+    if add_box:
+        plot = plot + geom_boxplot(width=0.12, fill="white", outlier_alpha=0.0, show_legend=False)
     plot = (
-        ggplot(tidy, aes(group_by, "value", fill=group_by))
-        + geom_violin(scale=scale)
+        plot
         + pe.facet_wrap("~feature", ncol=ncol, scales="free_y")
         + scale_fill_obs(adata, group_by)
         + labs(x="", y="expression", fill=group_by)

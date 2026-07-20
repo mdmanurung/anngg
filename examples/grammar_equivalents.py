@@ -40,11 +40,13 @@ from plotnine import (
     geom_line,
     geom_point,
     geom_tile,
+    element_blank,
     geom_violin,
     ggplot,
     guide_legend,
     guides,
     labs,
+    theme,
     scale_color_cmap,
     scale_fill_cmap,
     scale_size,
@@ -68,6 +70,7 @@ def embedding_grammar(adata, color=GROUP, basis="umap", label=True):
         + ag.scale_color_obs(adata, color)
         + guides(color=guide_legend(override_aes={"size": 4}))
         + ag.theme_anngg()
+        + theme(axis_text=element_blank(), axis_ticks=element_blank())  # arbitrary UMAP units
     )
     if label:
         cents = base.data.groupby(color, observed=True)[[xcol, ycol]].median().reset_index()
@@ -179,6 +182,7 @@ def violin_grammar(adata, gene="CD3D", group=GROUP):
     return (
         ggplot(d, aes(group, gene, fill=group))
         + geom_violin(scale="width")
+        + geom_boxplot(width=0.12, fill="white", outlier_alpha=0.0, show_legend=False)
         + ag.scale_fill_obs(adata, group)
         + labs(x="", y="expression")
         + ag.theme_anngg()
