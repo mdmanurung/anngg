@@ -8,6 +8,7 @@ don't cover.
 
 from __future__ import annotations
 
+import pandas as pd
 import plotnine_extra as pe
 from plotnine import aes, geom_area, geom_col, geom_line, geom_point, ggplot, labs
 
@@ -55,6 +56,16 @@ def plot_proportions(
     by = [split_by, group_by] if split_by else [group_by]
     counts = adata.ap.count(by=by)
 
+    if split_by:
+        # count() omits (split x group) combinations with zero cells; fill them
+        # with 0 so a stacked area/bar tiles cleanly instead of leaving gaps.
+        gcats = categories_order or _group_categories(adata, group_by) or sorted(counts[group_by].unique())
+        scats = split_order or _group_categories(adata, split_by) or sorted(counts[split_by].unique())
+        full = pd.MultiIndex.from_product([scats, gcats], names=[split_by, group_by])
+        counts = (
+            counts.set_index([split_by, group_by])["n"].reindex(full, fill_value=0).reset_index()
+        )
+
     if normalize:
         if split_by:
             denom = counts.groupby(split_by, observed=True)["n"].transform("sum")
@@ -88,9 +99,11 @@ def plot_proportions(
             + pe.rotate_x_text(45)
         )
     if kind == "area":
+        # no segment outline: on a many-group stacked area the thin white borders
+        # read as slivers/gaps; the qualitative fill colours separate the bands.
         return (
             ggplot(counts, aes(xvar, "value", fill=group_by, group=group_by))
-            + geom_area(position=position, color="white", size=0.15)
+            + geom_area(position=position)
             + scale_fill_obs(adata, group_by)
             + labs(x="", y=ylab, fill=group_by)
             + theme_anngg()

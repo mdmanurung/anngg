@@ -66,7 +66,9 @@ def _examples(adata):
             adata, metrics=["n_genes", "percent_mito", "n_counts"], group_by=GROUP
         ),
         "anngg.plot_qc_scatter": lambda: ag.plot_qc_scatter(adata, x="n_counts", y="n_genes", color=GROUP),
-        "anngg.plot_highest_expr_genes": lambda: ag.plot_highest_expr_genes(adata, n=20),
+        # use_raw: pbmc68k_reduced.X is scaled (z-scored); .raw is log-normalized,
+        # so "% of total counts" is meaningful there rather than blowing up.
+        "anngg.plot_highest_expr_genes": lambda: ag.plot_highest_expr_genes(adata, n=20, use_raw=True),
         "anngg.plot_clustermap": lambda: ag.plot_clustermap(adata, MARKERS, group_by=GROUP),
         "anngg.plot_upset": lambda: ag.plot_upset(marker_sets, min_cardinality=1),
     }

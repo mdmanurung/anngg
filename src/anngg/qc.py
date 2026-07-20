@@ -142,6 +142,14 @@ def plot_highest_expr_genes(adata, n: int = 20, *, use_raw: bool = False, layer:
     else:
         wide = _densify(adata.ap.to_df(x=list(adata.var_names), layer=lyr))
 
+    if (wide.to_numpy() < 0).any():
+        warnings.warn(
+            "plot_highest_expr_genes: the expression matrix has negative values, which "
+            "looks like scaled/z-scored data -- 'percent of total counts' will be "
+            "meaningless. Pass use_raw=True or layer= to point at counts or "
+            "log-normalized values.",
+            stacklevel=2,
+        )
     n_zero = int((wide.sum(axis=1) == 0).sum())
     if n_zero:
         warnings.warn(
