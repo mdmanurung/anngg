@@ -2,6 +2,8 @@
 
 **A ggplot2-style plotting layer for scanpy `AnnData` objects.**
 
+📖 **[Documentation](https://mdmanurung.github.io/anngg/)** — API reference, quickstart and gallery.
+
 `anngg` gives single-cell users the grammar of graphics over an `AnnData`, the
 way `ggplot2` works in R. It is conceptually the same idea as scanpy's
 [plotting-with-marsilea](https://scanpy.readthedocs.io/en/stable/how-to/plotting-with-marsilea.html)
@@ -36,8 +38,49 @@ All figures below are produced by `python examples/gallery.py` on
 | UMAP (stored palette) | `plot_features` grid | `plot_dotplot` |
 | ![DE dotplot](docs/images/de_dotplot.png) | ![Volcano](docs/images/volcano.png) | ![Composition](docs/images/proportions.png) |
 | `plot_rank_genes_dotplot` | `plot_volcano` | `plot_proportions` |
-| ![Stacked violin](docs/images/stacked_violin.png) | ![QC violins](docs/images/qc_violin.png) | |
-| `plot_stacked_violin` | `plot_qc_violin` | |
+| ![Stacked violin](docs/images/stacked_violin.png) | ![QC violins](docs/images/qc_violin.png) | ![Labelled UMAP](docs/images/umap_labelled.png) |
+| `plot_stacked_violin` | `plot_qc_violin` | `plot_embedding(label=True)` (repelled labels) |
+| ![Box](docs/images/box.png) | ![Expression bar](docs/images/expression_bar.png) | ![Correlation](docs/images/correlation.png) |
+| `plot_box` | `plot_expression_bar` | `plot_correlation` |
+
+### Gene-weighted density ([pyNebulosa](https://github.com/mdmanurung/pyNebulosa))
+
+`plot_density` recovers marker signal lost to dropout via weighted kernel density
+estimation on the embedding; `joint=True` adds a co-expression panel.
+
+![Density](docs/images/density.png)
+
+```python
+ag.plot_density(adata, ["CD3D", "NKG7"], basis="umap", joint=True)
+```
+
+### Set intersections ([marsilea](https://marsilea.readthedocs.io/))
+
+`plot_upset` draws an UpSet plot — e.g. which top marker genes are shared across
+cell types (the modern replacement for a Venn diagram).
+
+![UpSet](docs/images/upset.png)
+
+```python
+de = ag.rank_genes_df(adata)
+sets = {g: list(de[de["group"] == g].head(20)["names"]) for g in cell_types}
+ag.plot_upset(sets, min_cardinality=1)
+```
+
+Other additions inspired by [scplotter](https://pwwang.github.io/scplotter/) and
+[DOTools](https://dotools-py.readthedocs.io/): `plot_box`, `plot_expression_bar`,
+`plot_expression_line`, `plot_correlation`, and re-exported `geom_text_repel` /
+`geom_label_repel` ([ggrepel](https://github.com/slowkow/ggrepel)-style
+non-overlapping labels, via `plotnine-extra`).
+
+`plot_density` (pyNebulosa) and `plot_upset` (marsilea) use optional
+dependencies — install them with `pip install anngg[density]` /
+`anngg[upset]`.
+
+Every plotnine-native helper is just a stack of grammar layers.
+[`examples/grammar_equivalents.py`](examples/grammar_equivalents.py) rebuilds
+each one from `gganndata(adata, aes(...)) + geom_* + scale_* + theme` so you can
+see there is no magic and drop down to raw grammar whenever you need to.
 
 ## Design philosophy
 

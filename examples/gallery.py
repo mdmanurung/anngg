@@ -44,4 +44,26 @@ save(ag.plot_stacked_violin(adata, markers, group), "stacked_violin.png", width=
 save(ag.plot_qc_violin(adata, metrics=["n_genes", "percent_mito", "n_counts"], group_by=group),
      "qc_violin.png", width=7, height=8, dpi=90)
 
+# pyNebulosa-style density + dotools/scplotter-inspired utilities + repel labels
+save(ag.plot_embedding(adata, "umap", color=group, label=True),
+     "umap_labelled.png", width=7, height=5, dpi=100)
+save(ag.plot_density(adata, ["CD3D", "NKG7"], basis="umap", joint=True),
+     "density.png", width=10, height=3.2, dpi=100)
+save(ag.plot_box(adata, markers[:4], group), "box.png", width=6, height=8, dpi=100)
+save(ag.plot_expression_bar(adata, markers[:4], group), "expression_bar.png", width=6, height=8, dpi=100)
+save(ag.plot_expression_line(adata, markers[:3], x="phase", group_by=group),
+     "expression_line.png", width=7, height=7, dpi=100)
+save(ag.plot_correlation(adata, group, cluster=True), "correlation.png", width=6, height=5, dpi=100)
+
+# marsilea UpSet: which top markers are shared across cell types
+import matplotlib.pyplot as plt  # noqa: E402
+
+de = ag.rank_genes_df(adata)
+sel = ["CD14+ Monocyte", "CD19+ B", "CD56+ NK", "Dendritic"]
+marker_sets = {g: list(de[de["group"] == g].head(20)["names"]) for g in sel}
+upset = ag.plot_upset(marker_sets, min_cardinality=1)
+upset.save(os.path.join(OUT, "upset.png"), dpi=100)
+plt.close("all")
+print("wrote", os.path.relpath(os.path.join(OUT, "upset.png"), os.path.join(HERE, "..")))
+
 print("\nGallery written to", os.path.relpath(OUT, os.path.join(HERE, "..")))
