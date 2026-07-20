@@ -5,8 +5,8 @@ from __future__ import annotations
 import plotnine as p9
 import pytest
 
-import anngg as ag
-from anngg.layout import _tag_labels
+import ggann as ag
+from ggann.layout import _tag_labels
 
 
 def _panels(adata, group_key, markers, n=4):

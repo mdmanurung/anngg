@@ -1,4 +1,4 @@
-"""Reproduce the scanpy + marsilea how-to figures using anngg's grammar.
+"""Reproduce the scanpy + marsilea how-to figures using ggann's grammar.
 
 Mirrors https://scanpy.readthedocs.io/en/stable/how-to/plotting-with-marsilea.html
 but every figure is expressed with the ggplot2 grammar (or, for the clustered
@@ -20,7 +20,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import scanpy as sc
 
-import anngg as ag
+import ggann as ag
 
 OUT = os.path.join(os.path.dirname(__file__), "_output")
 os.makedirs(OUT, exist_ok=True)

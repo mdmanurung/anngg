@@ -1,9 +1,9 @@
-"""Reproduce scplotter's CellDimPlot / FeatureStatPlot vignette figures with anngg.
+"""Reproduce scplotter's CellDimPlot / FeatureStatPlot vignette figures with ggann.
 
 scplotter's vignettes run on a Seurat ``pancreas_sub`` object; here we reproduce
-the *chart types and options* on ``pbmc68k_reduced`` to show anngg reaches the
+the *chart types and options* on ``pbmc68k_reduced`` to show ggann reaches the
 same figures -- either directly through a helper or by composing one plotnine
-layer onto it (the composable API). Capabilities that need data anngg does not
+layer onto it (the composable API). Capabilities that need data ggann does not
 model (RNA velocity, pseudotime lineages, kNN-graph edges, 3D) are out of scope.
 
 Run: ``python examples/reproduce_scplotter.py`` -> writes docs/images/scplotter/.
@@ -32,7 +32,7 @@ from plotnine import (
     theme,
 )
 
-import anngg as ag
+import ggann as ag
 
 GROUP = "bulk_labels"
 MARKERS = ["CD3D", "CD8A", "NKG7", "GNLY", "MS4A1", "FCGR3A", "CST3"]
@@ -83,7 +83,7 @@ def build(adata):
         + geom_bin2d(bins=28)
         + scale_fill_cmap(cmap_name="magma")
         + labs(fill="count")
-        + ag.theme_anngg()
+        + ag.theme_ggann()
         + theme(axis_text=element_blank(), axis_ticks=element_blank()),
         "CellDimPlot(..., hex = TRUE)  [composed: + geom_bin2d]",
     )

@@ -1,6 +1,6 @@
 """Render one example figure per public plotting function for the API docs.
 
-Writes ``docs/images/api/anngg.<func>.png`` for each helper; the Sphinx extension
+Writes ``docs/images/api/ggann.<func>.png`` for each helper; the Sphinx extension
 ``docs/extensions/api_examples.py`` then injects the matching image into that
 function's API-reference page. Run locally (all optional deps installed) and
 commit the PNGs -- the docs build itself never executes plotting code.
@@ -21,8 +21,8 @@ import plotnine as p9
 import scanpy as sc
 from plotnine import geom_point
 
-import anngg as ag
-from anngg import aes, gganndata
+import ggann as ag
+from ggann import aes, gganndata
 
 GROUP = "bulk_labels"
 MARKERS = ["CD3D", "CD8A", "NKG7", "GNLY", "MS4A1", "FCGR3A", "CST3"]
@@ -40,37 +40,37 @@ def _examples(adata):
     sel = ["CD14+ Monocyte", "CD19+ B", "CD56+ NK", "Dendritic"]
     marker_sets = {g: list(de[de["group"] == g].head(20)["names"]) for g in sel}
     return {
-        "anngg.gganndata": lambda: gganndata(adata, aes("UMAP_1", "UMAP_2", color=GROUP))
+        "ggann.gganndata": lambda: gganndata(adata, aes("UMAP_1", "UMAP_2", color=GROUP))
         + geom_point(size=1.2)
-        + ag.theme_anngg(),
-        "anngg.plot_embedding": lambda: ag.plot_embedding(adata, "umap", color=GROUP, label=True),
-        "anngg.plot_features": lambda: ag.plot_features(adata, MARKERS[:4], basis="umap"),
-        "anngg.plot_density": lambda: ag.plot_density(adata, ["CD3D", "NKG7"], joint=True),
-        "anngg.plot_dotplot": lambda: ag.plot_dotplot(adata, MARKERS, GROUP),
-        "anngg.plot_dotplot_grouped": lambda: ag.plot_dotplot_grouped(adata, GENE_GROUPS, GROUP),
-        "anngg.plot_matrixplot": lambda: ag.plot_matrixplot(adata, MARKERS, GROUP, standard_scale="var"),
-        "anngg.plot_matrixplot_grouped": lambda: ag.plot_matrixplot_grouped(adata, GENE_GROUPS, GROUP),
-        "anngg.plot_violin": lambda: ag.plot_violin(adata, MARKERS[:3], GROUP),
-        "anngg.plot_ridge": lambda: ag.plot_ridge(adata, MARKERS[:3], GROUP),
-        "anngg.plot_stacked_violin": lambda: ag.plot_stacked_violin(adata, MARKERS, GROUP),
-        "anngg.plot_tracksplot": lambda: ag.plot_tracksplot(adata, MARKERS, GROUP),
-        "anngg.plot_box": lambda: ag.plot_box(adata, MARKERS[:3], GROUP),
-        "anngg.plot_expression_bar": lambda: ag.plot_expression_bar(adata, MARKERS[:3], GROUP),
-        "anngg.plot_expression_line": lambda: ag.plot_expression_line(adata, ["CD3D"], x="phase", group_by=GROUP),
-        "anngg.plot_proportions": lambda: ag.plot_proportions(adata, GROUP, split_by="phase"),
-        "anngg.plot_correlation": lambda: ag.plot_correlation(adata, GROUP),
-        "anngg.plot_rank_genes_dotplot": lambda: ag.plot_rank_genes_dotplot(adata, n_genes=3),
-        "anngg.plot_rank_genes_matrixplot": lambda: ag.plot_rank_genes_matrixplot(adata, n_genes=3),
-        "anngg.plot_volcano": lambda: ag.plot_volcano(adata, group="CD56+ NK"),
-        "anngg.plot_qc_violin": lambda: ag.plot_qc_violin(
+        + ag.theme_ggann(),
+        "ggann.plot_embedding": lambda: ag.plot_embedding(adata, "umap", color=GROUP, label=True),
+        "ggann.plot_features": lambda: ag.plot_features(adata, MARKERS[:4], basis="umap"),
+        "ggann.plot_density": lambda: ag.plot_density(adata, ["CD3D", "NKG7"], joint=True),
+        "ggann.plot_dotplot": lambda: ag.plot_dotplot(adata, MARKERS, GROUP),
+        "ggann.plot_dotplot_grouped": lambda: ag.plot_dotplot_grouped(adata, GENE_GROUPS, GROUP),
+        "ggann.plot_matrixplot": lambda: ag.plot_matrixplot(adata, MARKERS, GROUP, standard_scale="var"),
+        "ggann.plot_matrixplot_grouped": lambda: ag.plot_matrixplot_grouped(adata, GENE_GROUPS, GROUP),
+        "ggann.plot_violin": lambda: ag.plot_violin(adata, MARKERS[:3], GROUP),
+        "ggann.plot_ridge": lambda: ag.plot_ridge(adata, MARKERS[:3], GROUP),
+        "ggann.plot_stacked_violin": lambda: ag.plot_stacked_violin(adata, MARKERS, GROUP),
+        "ggann.plot_tracksplot": lambda: ag.plot_tracksplot(adata, MARKERS, GROUP),
+        "ggann.plot_box": lambda: ag.plot_box(adata, MARKERS[:3], GROUP),
+        "ggann.plot_expression_bar": lambda: ag.plot_expression_bar(adata, MARKERS[:3], GROUP),
+        "ggann.plot_expression_line": lambda: ag.plot_expression_line(adata, ["CD3D"], x="phase", group_by=GROUP),
+        "ggann.plot_proportions": lambda: ag.plot_proportions(adata, GROUP, split_by="phase"),
+        "ggann.plot_correlation": lambda: ag.plot_correlation(adata, GROUP),
+        "ggann.plot_rank_genes_dotplot": lambda: ag.plot_rank_genes_dotplot(adata, n_genes=3),
+        "ggann.plot_rank_genes_matrixplot": lambda: ag.plot_rank_genes_matrixplot(adata, n_genes=3),
+        "ggann.plot_volcano": lambda: ag.plot_volcano(adata, group="CD56+ NK"),
+        "ggann.plot_qc_violin": lambda: ag.plot_qc_violin(
             adata, metrics=["n_genes", "percent_mito", "n_counts"], group_by=GROUP
         ),
-        "anngg.plot_qc_scatter": lambda: ag.plot_qc_scatter(adata, x="n_counts", y="n_genes", color=GROUP),
+        "ggann.plot_qc_scatter": lambda: ag.plot_qc_scatter(adata, x="n_counts", y="n_genes", color=GROUP),
         # use_raw: pbmc68k_reduced.X is scaled (z-scored); .raw is log-normalized,
         # so "% of total counts" is meaningful there rather than blowing up.
-        "anngg.plot_highest_expr_genes": lambda: ag.plot_highest_expr_genes(adata, n=20, use_raw=True),
-        "anngg.plot_clustermap": lambda: ag.plot_clustermap(adata, MARKERS, group_by=GROUP),
-        "anngg.plot_upset": lambda: ag.plot_upset(marker_sets, min_cardinality=1),
+        "ggann.plot_highest_expr_genes": lambda: ag.plot_highest_expr_genes(adata, n=20, use_raw=True),
+        "ggann.plot_clustermap": lambda: ag.plot_clustermap(adata, MARKERS, group_by=GROUP),
+        "ggann.plot_upset": lambda: ag.plot_upset(marker_sets, min_cardinality=1),
     }
 
 

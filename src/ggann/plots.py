@@ -34,7 +34,7 @@ from plotnine import (
 from ._aggregate import aggregate_expression, tidy_expression
 from ._palette import scale_color_obs, scale_fill_obs
 from ._resolve import embedding_coords, plain_name, resolve_frame
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = [
     "plot_embedding",
@@ -143,12 +143,12 @@ def plot_embedding(
                 ggplot(base, aes(xcol, ycol))
                 + pe.geom_pointdensity(size=size, alpha=alpha)
                 + labs(color="density")
-                + theme_anngg()
+                + theme_ggann()
                 + _embedding_axes()
             )
         return _facet(
             pe.DimPlot(base, x=xcol, y=ycol, size=size, alpha=alpha)
-            + theme_anngg()
+            + theme_ggann()
             + _embedding_axes()
         )
 
@@ -175,7 +175,7 @@ def plot_embedding(
             pe.FeatureDimPlot(
                 df, feature=cname, x=xcol, y=ycol, low=low, high=high, size=size, alpha=alpha
             )
-            + theme_anngg()
+            + theme_ggann()
             + _embedding_axes()
         )
     plot = (
@@ -183,7 +183,7 @@ def plot_embedding(
         + scale_color_obs(adata, cname)
         # enlarge the legend swatches so categories stay readable (scplotter does this)
         + guides(color=guide_legend(override_aes={"size": 4}))
-        + theme_anngg()
+        + theme_ggann()
         + _embedding_axes()
     )
     if label:
@@ -242,7 +242,7 @@ def plot_features(
         + geom_point(size=size, alpha=alpha)
         + pe.facet_wrap("~feature", ncol=ncol)
         + scale_color_cmap(cmap_name=cmap)
-        + theme_anngg()
+        + theme_ggann()
         + _embedding_axes()
     )
 
@@ -327,7 +327,7 @@ def plot_dotplot(
         + scale_color_cmap(cmap_name=cmap)
         + scale_size(range=size_range, labels=lambda xs: [f"{x:.0%}" for x in xs])
         + labs(x="", y="", color=color_lab, size="fraction\nexpressing")
-        + theme_anngg()
+        + theme_ggann()
         + pe.rotate_x_text(45)
     )
     return plot + pe.facet_wrap(f"~{split_by}") if split_by else plot
@@ -371,7 +371,7 @@ def plot_matrixplot(
         + geom_tile()
         + scale_fill_cmap(cmap_name=cmap)
         + labs(x="", y="", fill=color_lab)
-        + theme_anngg()
+        + theme_ggann()
         + pe.rotate_x_text(45)
     )
     return plot + pe.facet_wrap(f"~{split_by}") if split_by else plot
@@ -418,7 +418,7 @@ def plot_violin(
         + _feature_facet(split_by, ncol=ncol)
         + scale_fill_obs(adata, group_by)
         + labs(x="", y="expression", fill=group_by)
-        + theme_anngg()
+        + theme_ggann()
         + pe.rotate_x_text(45)
     )
     if stats:

@@ -8,7 +8,7 @@ import pytest
 import scipy.sparse as sp
 from anndata import AnnData
 
-import anngg as ag
+import ggann as ag
 
 
 def _build(plot):

@@ -3,13 +3,13 @@
 Aggregates single cells to one profile per ``sample_col`` x ``group_by`` (e.g. per
 donor per cell type) with decoupler's ``pp.pseudobulk`` -- the same aggregation
 liana's MOFA-cellular workflow builds on. It returns a **new AnnData**, so every
-anngg grammar / ``plot_*`` helper works on the pseudobulk object unchanged:
+ggann grammar / ``plot_*`` helper works on the pseudobulk object unchanged:
 
     pb = ag.pseudobulk(adata, sample_col="donor", group_by="cell_type")
     ag.plot_dotplot(pb, markers, "cell_type", use_raw=False)
     gganndata(pb, aes("cell_type", gene("CD3D"), fill="condition")) + geom_boxplot()
 
-decoupler is an optional dependency (``anngg[pseudobulk]``).
+decoupler is an optional dependency (``ggann[pseudobulk]``).
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ def _require_decoupler():
     except ImportError as exc:  # pragma: no cover - only without the dep
         raise ImportError(
             "pseudobulk requires decoupler; install with `pip install decoupler` "
-            "(bundled in the anngg[pseudobulk] extra)."
+            "(bundled in the ggann[pseudobulk] extra)."
         ) from exc
     return dc
 
@@ -60,7 +60,7 @@ def pseudobulk(
     Returns
     -------
     A pseudobulk :class:`~anndata.AnnData` whose observations are sample x group
-    profiles -- ready to hand straight back to any anngg helper or ``gganndata``.
+    profiles -- ready to hand straight back to any ggann helper or ``gganndata``.
     """
     dc = _require_decoupler()
     pb = dc.pp.pseudobulk(

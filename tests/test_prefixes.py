@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from plotnine import geom_point, ggplot
 
-from anngg import aes, gganndata
-from anngg._resolve import parse_token, plain_name, resolve_frame, Ref, ObsmRef
+from ggann import aes, gganndata
+from ggann._resolve import parse_token, plain_name, resolve_frame, Ref, ObsmRef
 
 
 @pytest.fixture(scope="module")

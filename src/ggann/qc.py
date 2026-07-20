@@ -26,7 +26,7 @@ from plotnine import (
 from ._aggregate import expression_source
 from ._palette import scale_fill_obs
 from ._resolve import _densify, _raw_wide
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = ["plot_qc_violin", "plot_qc_scatter", "plot_highest_expr_genes"]
 
@@ -88,12 +88,12 @@ def plot_qc_violin(
         p
         + pe.facet_wrap("~metric", scales="free_y")
         + labs(x="", y="", fill=group_by or "")
-        + theme_anngg()
+        + theme_ggann()
     )
     if group_by:
         # the fill legend already encodes group; many long cell-type names across
         # shared-x facets are illegible -- drop the redundant x ticks (added last so
-        # it wins over theme_anngg's axis_text).
+        # it wins over theme_ggann's axis_text).
         p = p + theme(axis_text_x=element_blank(), axis_ticks_major_x=element_blank())
     return p
 
@@ -167,5 +167,5 @@ def plot_highest_expr_genes(adata, n: int = 20, *, use_raw: bool = False, layer:
         + geom_boxplot(fill="#4c72b0", outlier_alpha=0.2)
         + pe.coord_flip()
         + labs(x="", y="% of total counts per cell")
-        + theme_anngg()
+        + theme_ggann()
     )

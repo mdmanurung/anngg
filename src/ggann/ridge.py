@@ -26,7 +26,7 @@ from plotnine import (
 from ._aggregate import tidy_expression
 from ._palette import scale_fill_obs
 from .plots import _group_categories, _order_groups
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = ["plot_ridge"]
 
@@ -114,6 +114,6 @@ def plot_ridge(
         + scale_fill_obs(adata, group_by)
         + scale_y_continuous(breaks=list(pos.values()), labels=order)
         + labs(x="expression", y="", fill=group_by)
-        + theme_anngg()
+        + theme_ggann()
         + theme(panel_grid=element_blank())
     )

@@ -6,7 +6,7 @@ import numpy as np
 import plotnine as p9
 import pytest
 
-import anngg as ag
+import ggann as ag
 
 
 def _build(plot):
@@ -64,12 +64,12 @@ def test_pseudobulk_returns_anndata(counts_adata):
 
 
 def test_grammar_and_helpers_work_on_pseudobulk(counts_adata):
-    # the whole point: the pseudobulk AnnData plugs straight back into anngg
+    # the whole point: the pseudobulk AnnData plugs straight back into ggann
     pb = ag.pseudobulk(
         counts_adata, sample_col="donor", group_by="bulk_labels", layer="counts",
         min_cells=1, skip_checks=True,
     )
-    from anngg import aes, gene, gganndata
+    from ggann import aes, gene, gganndata
     from plotnine import geom_boxplot
 
     _build(gganndata(pb, aes("bulk_labels", gene("CD3D"), fill="donor")) + geom_boxplot())

@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from plotnine import ggplot, geom_point
 
-from anngg import aes, gene, gganndata, obs
-from anngg._resolve import resolve_frame
+from ggann import aes, gene, gganndata, obs
+from ggann._resolve import resolve_frame
 
 
 @pytest.fixture(scope="module")

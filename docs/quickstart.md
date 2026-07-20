@@ -1,13 +1,13 @@
 # Quickstart
 
-Every figure in `anngg` is a real `plotnine.ggplot`. You can build it two ways —
+Every figure in `ggann` is a real `plotnine.ggplot`. You can build it two ways —
 with the low-level grammar or with a high-level helper — and they compose with
 plotnine's `+ geom_* / + scale_* / + theme(...)` either way.
 
 ```python
 import scanpy as sc
-import anngg as ag
-from anngg import gganndata, aes
+import ggann as ag
+from ggann import gganndata, aes
 from plotnine import geom_point
 
 adata = sc.datasets.pbmc68k_reduced()
@@ -26,7 +26,7 @@ Force a source with the `gene(...)` / `obs(...)` escapes when a name is
 ambiguous, or mix sources across aesthetics:
 
 ```python
-from anngg import gene
+from ggann import gene
 gganndata(adata, aes("UMAP_1", "UMAP_2", color=gene("CD3D"))) + geom_point()
 ```
 
@@ -37,18 +37,18 @@ The `plot_*` helpers reproduce scanpy's core figures:
 ```python
 ag.plot_embedding(adata, "umap", color="bulk_labels", label=True)
 ag.plot_dotplot(adata, ["CD3D", "NKG7", "CST3"], group_by="bulk_labels")
-ag.plot_density(adata, ["CD3D", "NKG7"], joint=True)      # needs anngg[density]
+ag.plot_density(adata, ["CD3D", "NKG7"], joint=True)      # needs ggann[density]
 ag.plot_box(adata, ["CD3D", "NKG7"], group_by="bulk_labels")
 ```
 
 Each plotnine-native helper is only a stack of grammar layers — see
-[`examples/grammar_equivalents.py`](https://github.com/mdmanurung/anngg/blob/main/examples/grammar_equivalents.py)
+[`examples/grammar_equivalents.py`](https://github.com/mdmanurung/ggann/blob/main/examples/grammar_equivalents.py)
 for the layer-by-layer twin of every helper.
 
 ## One consistent look
 
-Call `ag.set_theme()` once to make the anngg theme plotnine's default, so every
-figure — even a bare `ggplot(...)` — shares it without `+ theme_anngg()`:
+Call `ag.set_theme()` once to make the ggann theme plotnine's default, so every
+figure — even a bare `ggplot(...)` — shares it without `+ theme_ggann()`:
 
 ```python
 ag.set_theme(base_size=9, family="Arial")   # family is optional; no font is required

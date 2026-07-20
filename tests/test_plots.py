@@ -2,8 +2,8 @@ import pandas as pd
 import pytest
 from plotnine import geom_point, ggplot
 
-import anngg as ag
-from anngg import aes, gganndata
+import ggann as ag
+from ggann import aes, gganndata
 
 
 def _renders(plot, tmp_path, name):

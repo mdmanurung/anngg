@@ -1,7 +1,7 @@
 # API Reference
 
 ```{eval-rst}
-.. currentmodule:: anngg
+.. currentmodule:: ggann
 ```
 
 ## Grammar
@@ -127,7 +127,7 @@ The grammar entry point and the aesthetic-resolution escapes.
    :toctree: generated
    :nosignatures:
 
-   theme_anngg
+   theme_ggann
    set_theme
    reset_theme
    sizes

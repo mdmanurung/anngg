@@ -31,7 +31,7 @@ from ._aggregate import tidy_expression
 from ._palette import scale_color_obs, scale_fill_obs
 from ._resolve import plain_name, resolve_frame
 from .plots import _feature_facet, _group_categories, _is_numeric, _order_groups
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = ["plot_box", "plot_expression_bar", "plot_expression_line"]
 
@@ -95,7 +95,7 @@ def plot_box(
         + _feature_facet(split_by, ncol=ncol)
         + scale_fill_obs(adata, group_by)
         + labs(x="", y="expression", fill=group_by)
-        + theme_anngg()
+        + theme_ggann()
         + pe.rotate_x_text(45)
     )
     if stats:
@@ -122,7 +122,7 @@ def plot_expression_bar(
     pandas reduction). ``error`` is the summary bar: ``"se"`` (default), ``"sd"`` or
     ``"none"``. ``split_by`` adds a gene x split facet grid. Bars start at zero and
     hide the distribution -- for a distribution-honest view use :func:`plot_box` or
-    :func:`anngg.plot_violin`.
+    :func:`ggann.plot_violin`.
     """
     genes = list(genes)
     extra = [split_by] if split_by else []
@@ -142,7 +142,7 @@ def plot_expression_bar(
         + _feature_facet(split_by, ncol=ncol)
         + scale_fill_obs(adata, group_by)
         + labs(x="", y=ylab, fill=group_by)
-        + theme_anngg()
+        + theme_ggann()
         + pe.rotate_x_text(45)
     )
     if error != "none":
@@ -212,7 +212,7 @@ def plot_expression_line(
         + geom_point(size=2)
         + pe.facet_wrap("~feature", ncol=ncol, scales="free_y")
         + labs(x=xname, y=ylab, color=gname)
-        + theme_anngg()
+        + theme_ggann()
     )
     if color is not None:
         plot = plot + scale_color_obs(adata, gname)

@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from plotnine import ggplot
 
-import anngg as ag
-from anngg import obs_colors
+import ggann as ag
+from ggann import obs_colors
 
 
 def _renders(plot, tmp_path, name):

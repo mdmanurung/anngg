@@ -1,10 +1,10 @@
-# anngg
+# ggann
 
 **A ggplot2-style plotting layer for scanpy `AnnData` objects.**
 
-📖 **[Documentation](https://mdmanurung.github.io/anngg/)** — API reference, quickstart and gallery.
+📖 **[Documentation](https://mdmanurung.github.io/ggann/)** — API reference, quickstart and gallery.
 
-`anngg` gives single-cell users the grammar of graphics over an `AnnData`, the
+`ggann` gives single-cell users the grammar of graphics over an `AnnData`, the
 way `ggplot2` works in R. It is conceptually the same idea as scanpy's
 [plotting-with-marsilea](https://scanpy.readthedocs.io/en/stable/how-to/plotting-with-marsilea.html)
 how-to — but every figure is written as
@@ -13,8 +13,8 @@ how-to — but every figure is written as
 
 ```python
 import scanpy as sc
-import anngg as ag
-from anngg import gganndata, aes
+import ggann as ag
+from ggann import gganndata, aes
 from plotnine import geom_point
 
 adata = sc.datasets.pbmc68k_reduced()
@@ -74,8 +74,8 @@ Other additions inspired by [scplotter](https://pwwang.github.io/scplotter/) and
 non-overlapping labels, via `plotnine-extra`).
 
 `plot_density` (pyNebulosa) and `plot_upset` (marsilea) use optional
-dependencies — install them with `pip install anngg[density]` /
-`anngg[upset]`.
+dependencies — install them with `pip install ggann[density]` /
+`ggann[upset]`.
 
 Every plotnine-native helper is just a stack of grammar layers.
 [`examples/grammar_equivalents.py`](examples/grammar_equivalents.py) rebuilds
@@ -195,15 +195,15 @@ gene across two layers, extract it twice under different names yourself.)
 | `plot_proportions(adata, group_by, split_by=...)` | cell-type composition bars | `plotnine.ggplot` |
 | `plot_qc_violin` / `plot_qc_scatter` / `plot_highest_expr_genes` | QC-metric plots | `plotnine.ggplot` |
 | `plot_clustermap(adata, genes, group_by=..., annotations=...)` | clustered heatmap (escape hatch) | `ClusterMapPlotter` |
-| `theme_anngg()`, `scale_color_expression()`, `scale_color_obs(adata, col)` | theme & scales (incl. scanpy stored palettes) | plotnine objects |
+| `theme_ggann()`, `scale_color_expression()`, `scale_color_obs(adata, col)` | theme & scales (incl. scanpy stored palettes) | plotnine objects |
 | `Beside` / `Stack` / `Wrap` / `plot_layout` (re-exported) | multi-panel figure composition | plotnine-extra objects |
 
 ## Installation
 
 ```bash
-pip install git+https://github.com/mdmanurung/anngg
+pip install git+https://github.com/mdmanurung/ggann
 # clustered heatmaps (optional):
-pip install "anngg[heatmap] @ git+https://github.com/mdmanurung/anngg"
+pip install "ggann[heatmap] @ git+https://github.com/mdmanurung/ggann"
 ```
 
 `annplyr` is installed from GitHub automatically. `PyComplexHeatmap` is optional

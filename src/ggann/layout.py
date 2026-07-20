@@ -53,7 +53,7 @@ def compose(panels: Sequence, *, ncol: int | None = None, nrow: int | None = Non
             tag_levels: str | None = "A"):
     """Arrange plots into a tagged multi-panel figure.
 
-    ``panels`` is a flat list of plotnine plots (anngg helpers return these). They
+    ``panels`` is a flat list of plotnine plots (ggann helpers return these). They
     are wrapped into a grid -- ``ncol`` / ``nrow`` control the shape (default: a
     roughly square layout) -- and tagged ``A``, ``B``, ... unless ``tag_levels=None``.
 

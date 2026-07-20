@@ -1,6 +1,6 @@
-"""Default theme and single-cell colour scales for anngg.
+"""Default theme and single-cell colour scales for ggann.
 
-These are thin conveniences over plotnine / plotnine-extra so that anngg figures
+These are thin conveniences over plotnine / plotnine-extra so that ggann figures
 have a consistent, publication-friendly look while remaining ordinary plotnine
 objects the user can override with any ``+ theme(...)`` / ``+ scale_*``.
 """
@@ -20,7 +20,7 @@ from plotnine import (
 )
 
 __all__ = [
-    "theme_anngg",
+    "theme_ggann",
     "set_theme",
     "reset_theme",
     "sizes",
@@ -71,7 +71,7 @@ class _Sizes:
 sizes = _Sizes()
 
 
-def theme_anngg(base_size: float = 11, base_family: str | None = None):
+def theme_ggann(base_size: float = 11, base_family: str | None = None):
     """A clean, boxed theme emulating scplotter / plotthis ``theme_this``.
 
     The signature scplotter look is a thin black panel border (a full box) with
@@ -90,22 +90,22 @@ def theme_anngg(base_size: float = 11, base_family: str | None = None):
 
 
 def set_theme(base_size: float = 11, family: str | None = None, *, register: bool = True):
-    """Make :func:`theme_anngg` the default look for every figure (exactplot ``xp_init``).
+    """Make :func:`theme_ggann` the default look for every figure (exactplot ``xp_init``).
 
-    Sets ``anngg.sizes`` from ``base_size`` and, when ``register=True`` (default),
+    Sets ``ggann.sizes`` from ``base_size`` and, when ``register=True`` (default),
     registers the theme as plotnine's **global default** via ``theme_set`` -- so a
-    bare ``ggplot(...)`` / ``gganndata(...)`` gets the anngg look without adding
-    ``+ theme_anngg()``. The theme is also returned, so it stays composable.
+    bare ``ggplot(...)`` / ``gganndata(...)`` gets the ggann look without adding
+    ``+ theme_ggann()``. The theme is also returned, so it stays composable.
 
     This mutates plotnine's global default theme (a deliberate, process-wide side
     effect); call :func:`reset_theme` to restore plotnine's default, or pass
     ``register=False`` to only get the theme and update ``sizes``.
 
     ``family`` sets the font (any installed family, e.g. ``"Arial"`` /
-    ``"IBM Plex Sans"``); ``None`` keeps matplotlib's default -- anngg requires no
+    ``"IBM Plex Sans"``); ``None`` keeps matplotlib's default -- ggann requires no
     particular font to be installed.
     """
-    th = theme_anngg(base_size=base_size, base_family=family)
+    th = theme_ggann(base_size=base_size, base_family=family)
     sizes.update(base_size)
     if register:
         theme_set(th)

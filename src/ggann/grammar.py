@@ -12,7 +12,7 @@ from __future__ import annotations
 from plotnine import aes, ggplot
 
 from ._resolve import ObsmRef, Ref, plain_name, resolve_frame
-from .theme import theme_anngg
+from .theme import theme_ggann
 
 __all__ = ["gganndata", "aes"]
 
@@ -66,14 +66,14 @@ def gganndata(
     mapping
         A plotnine ``aes(...)``. Names are resolved across ``obs`` columns, genes
         (in ``X`` / a ``layer`` / ``raw``) and embedding coordinates such as
-        ``"UMAP_1"``. Use :func:`anngg.gene` / :func:`anngg.obs` to force a source.
+        ``"UMAP_1"``. Use :func:`ggann.gene` / :func:`ggann.obs` to force a source.
     layer
         Read expression from ``adata.layers[layer]`` instead of ``X``.
     use_raw
         Read expression from ``adata.raw``. Defaults to ``True`` when ``adata.raw``
         exists and no ``layer`` is given (scanpy's convention).
     add_theme
-        Add :func:`theme_anngg` to the returned plot.
+        Add :func:`theme_ggann` to the returned plot.
 
     Returns
     -------
@@ -87,5 +87,5 @@ def gganndata(
     )
     plot = ggplot(df, _plain_mapping(adata, mapping))
     if add_theme:
-        plot = plot + theme_anngg()
+        plot = plot + theme_ggann()
     return plot

@@ -1,16 +1,16 @@
-# anngg
+# ggann
 
 **A ggplot2-style plotting layer for scanpy `AnnData` objects.**
 
-`anngg` gives single-cell users the grammar of graphics over an `AnnData`, the
+`ggann` gives single-cell users the grammar of graphics over an `AnnData`, the
 way `ggplot2` works in R. `gganndata(adata) + aes(...) + geom_*()` returns a real
 [`plotnine.ggplot`](https://plotnine.org), and high-level `plot_*` helpers
 reproduce scanpy's core figures — every one is a thin stack of grammar layers.
 
 ```python
 import scanpy as sc
-import anngg as ag
-from anngg import gganndata, aes
+import ggann as ag
+from ggann import gganndata, aes
 from plotnine import geom_point
 
 adata = sc.datasets.pbmc68k_reduced()
@@ -28,7 +28,7 @@ ag.plot_dotplot(adata, ["CD3D", "NKG7", "CST3"], group_by="bulk_labels")
 ::::{grid} 1 1 2 2
 :gutter: 2
 
-:::{grid-item-card} Install anngg
+:::{grid-item-card} Install ggann
 :link: installation
 :link-type: doc
 
@@ -46,7 +46,7 @@ Build your first figures, both ways.
 :link: gallery
 :link-type: doc
 
-See every figure `anngg` produces on `pbmc68k_reduced`.
+See every figure `ggann` produces on `pbmc68k_reduced`.
 :::
 
 :::{grid-item-card} API Reference

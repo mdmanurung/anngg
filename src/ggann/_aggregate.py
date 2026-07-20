@@ -47,7 +47,7 @@ def tidy_expression(adata, genes, group_by, *, layer=None, use_raw=None, extra_o
 def expression_source(adata, layer: str | None, use_raw: bool | None) -> tuple[str, str | None]:
     """Decide which matrix to aggregate: ``("raw", None)``, ``("layer", name)`` or ``("x", None)``.
 
-    Thin wrapper over :func:`anngg._resolve.resolve_source` so the aggregation
+    Thin wrapper over :func:`ggann._resolve.resolve_source` so the aggregation
     path and the grammar path share one source-of-truth (and raise identically
     on ``use_raw=True`` with no ``adata.raw``, or ``layer`` + ``use_raw=True``).
     """
@@ -60,7 +60,7 @@ def group_means(
     """Mean expression per group (index) per gene (columns), mean-only.
 
     Like :func:`aggregate_expression` but skips the fraction-expressing pass, for
-    callers (e.g. :func:`anngg.plot_correlation`) that only need the group means.
+    callers (e.g. :func:`ggann.plot_correlation`) that only need the group means.
     """
     genes = list(genes)
     kind, lyr = expression_source(adata, layer, use_raw)
@@ -77,7 +77,7 @@ def _standardize(mean_df: pd.DataFrame, standard_scale: str | None) -> pd.DataFr
 
     ``'var'`` (per-gene 0..1) and ``'group'`` (per-group 0..1) match scanpy's
     ``standard_scale``. ``'zscore'`` (per-gene z-score, population std) is an
-    anngg extension not present in scanpy.
+    ggann extension not present in scanpy.
     """
     if standard_scale is None:
         return mean_df
@@ -112,7 +112,7 @@ def aggregate_expression(
     downstream plots keep the requested gene order. ``extra_by`` adds grouping
     columns (e.g. a ``split_by`` facet) so means/fractions are computed per
     ``group_by`` × ``extra_by`` combination. ``standard_scale`` may be
-    ``'var'`` / ``'group'`` (scanpy conventions) or ``'zscore'`` (an anngg
+    ``'var'`` / ``'group'`` (scanpy conventions) or ``'zscore'`` (an ggann
     extension); ``None`` leaves the raw group means untouched.
     """
     genes = list(genes)

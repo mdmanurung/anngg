@@ -12,7 +12,7 @@ import os
 import plotnine as p9
 import pytest
 
-import anngg as ag
+import ggann as ag
 
 _PATH = os.path.join(os.path.dirname(__file__), "..", "examples", "reproduce_scplotter.py")
 _spec = importlib.util.spec_from_file_location("reproduce_scplotter", _PATH)

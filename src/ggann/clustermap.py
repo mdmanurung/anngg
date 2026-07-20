@@ -7,7 +7,7 @@ builds an annplyr-tidied matrix and hands it to
 :class:`PyComplexHeatmap.ClusterMapPlotter`, returning that plotter object.
 
 ``PyComplexHeatmap`` is an optional dependency; it is imported lazily so that
-``import anngg`` never requires it.
+``import ggann`` never requires it.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ def _require_pch():
     except ImportError as exc:  # pragma: no cover - env-dependent
         raise ImportError(
             "plot_clustermap requires PyComplexHeatmap. "
-            "Install it with `pip install anngg[heatmap]` or `pip install PyComplexHeatmap`."
+            "Install it with `pip install ggann[heatmap]` or `pip install PyComplexHeatmap`."
         ) from exc
     return pch
 
@@ -59,7 +59,7 @@ def plot_clustermap(
     * ``group_by=None`` -> columns are individual cells; ``annotations`` selects
       ``obs`` columns to show as top annotation bars.
 
-    ``standard_scale`` (anngg-side, per gene/group) and ``z_score``
+    ``standard_scale`` (ggann-side, per gene/group) and ``z_score``
     (PyComplexHeatmap-side row/column z-score) are mutually exclusive -- applying
     both would normalize twice. Returns the
     :class:`PyComplexHeatmap.ClusterMapPlotter` instance.
