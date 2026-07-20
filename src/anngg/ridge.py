@@ -15,6 +15,7 @@ import plotnine_extra as pe
 from plotnine import (
     aes,
     element_blank,
+    geom_line,
     geom_ribbon,
     ggplot,
     labs,
@@ -96,9 +97,19 @@ def plot_ridge(
     long[group_by] = pd.Categorical(long[group_by], categories=order, ordered=True)
     long["feature"] = pd.Categorical(long["feature"], categories=[str(x) for x in genes], ordered=True)
 
+    # Draw top ridges first so lower ones layer IN FRONT and overlap cleanly
+    # (a single ribbon layer paints higher rows on top, clipping the peaks below).
+    # Each ridge is a filled area with a thin white line tracing only its top edge,
+    # not a boxed outline -- so the silhouettes blend instead of looking cut.
+    plot = ggplot(long, aes("x"))
+    for g in reversed(order):
+        gd = long[long[group_by] == g]
+        plot = plot + geom_ribbon(
+            aes(ymin="ymin", ymax="ymax", fill=group_by), data=gd, alpha=0.9
+        )
+        plot = plot + geom_line(aes(y="ymax"), data=gd, color="white", size=0.4)
     return (
-        ggplot(long, aes("x", ymin="ymin", ymax="ymax", fill=group_by, group=group_by))
-        + geom_ribbon(color="white", size=0.25, alpha=0.9)
+        plot
         + pe.facet_wrap("~feature", ncol=ncol, scales="free_x")
         + scale_fill_obs(adata, group_by)
         + scale_y_continuous(breaks=list(pos.values()), labels=order)
