@@ -7,7 +7,10 @@ dist/
 .pytest_cache/
 .ruff_cache/
 examples/_output/
+examples/_compare/
+examples/_phase1/
 /tmp/
 *.png
 !examples/_output/.gitkeep
+!docs/images/*.png
 .ipynb_checkpoints/

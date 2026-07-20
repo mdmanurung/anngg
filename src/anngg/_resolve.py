@@ -239,6 +239,13 @@ def _densify(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _raw_wide(adata, var_names) -> pd.DataFrame:
+    """Wide cells x genes DataFrame from ``adata.raw``, with the ``raw_`` prefix stripped."""
+    var_names = list(var_names)
+    wide = adata.ap.to_df(raw=var_names).rename(columns={f"raw_{g}": g for g in var_names})
+    return _densify(wide)
+
+
 # --------------------------------------------------------------------------- #
 # Frame resolution
 # --------------------------------------------------------------------------- #
@@ -298,10 +305,10 @@ def resolve_frame(
             if tok.source == "obs":
                 _dispatch(name, "obs", obs_cols, obs_names)
             else:  # forced gene
-                k, l = _ref_source(tok)
+                k, lyr = _ref_source(tok)
                 if name not in _gene_universe(adata, k):
-                    raise KeyError(f"gene('{name}') not found in {_source_label(k, l)}.")
-                gene_specs.append((name, k, l))
+                    raise KeyError(f"gene('{name}') not found in {_source_label(k, lyr)}.")
+                gene_specs.append((name, k, lyr))
             order.append(name)
             continue
 
@@ -343,19 +350,16 @@ def resolve_frame(
     # group genes by their (matrix, layer) so mixed per-aesthetic sources each
     # get one extraction pass
     by_source: dict[tuple[str, str | None], list[str]] = {}
-    for name, k, l in gene_specs:
-        by_source.setdefault((k, l), []).append(name)
-    for (k, l), gnames in by_source.items():
+    for name, k, lyr in gene_specs:
+        by_source.setdefault((k, lyr), []).append(name)
+    for (k, lyr), gnames in by_source.items():
         if k == "raw":
-            wide = adata.ap.to_df(raw=gnames).rename(
-                columns={f"raw_{g}": g for g in gnames}
-            )
+            frames.append(_raw_wide(adata, gnames))
         else:
             kw: dict = {"x": gnames}
-            if l is not None:
-                kw["layer"] = l
-            wide = adata.ap.to_df(**kw)
-        frames.append(_densify(wide))
+            if lyr is not None:
+                kw["layer"] = lyr
+            frames.append(_densify(adata.ap.to_df(**kw)))
 
     # group embedding coordinates by obsm key (one extraction, take the columns)
     by_key: dict[str, list[tuple[str, int]]] = {}
