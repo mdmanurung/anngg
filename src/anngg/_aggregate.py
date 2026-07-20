@@ -20,9 +20,26 @@ import pandas as pd
 
 from ._resolve import _densify, resolve_source
 
-__all__ = ["aggregate_expression", "expression_source"]
+__all__ = ["aggregate_expression", "expression_source", "tidy_expression"]
 
 StandardScale = Literal["var", "group", "zscore"]
+
+
+def tidy_expression(adata, genes, group_by, *, layer=None, use_raw=None):
+    """Long per-cell expression ``[obs_name, feature, value, group_by]`` via annplyr.
+
+    Shared by the violin / stacked-violin / tracksplot paths so the source
+    picking, densification and feature-ordering live in one place.
+    """
+    genes = list(genes)
+    kind, lyr = resolve_source(adata, layer, use_raw)
+    if kind == "raw":
+        tidy = adata.ap.to_tidy(obs=[group_by], raw=genes)
+    else:
+        tidy = adata.ap.to_tidy(obs=[group_by], x=genes, layer=lyr)
+    tidy = _densify(tidy)
+    tidy["feature"] = pd.Categorical(tidy["feature"], categories=genes, ordered=True)
+    return tidy
 
 
 def expression_source(adata, layer: str | None, use_raw: bool | None) -> tuple[str, str | None]:

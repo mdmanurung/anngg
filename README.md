@@ -25,6 +25,20 @@ ag.plot_embedding(adata, basis="umap", color="CD3D")
 ag.plot_dotplot(adata, ["CD3D", "NKG7", "CST3"], group_by="bulk_labels")
 ```
 
+## Gallery
+
+All figures below are produced by `python examples/gallery.py` on
+`pbmc68k_reduced`.
+
+| | | |
+|:---:|:---:|:---:|
+| ![UMAP by cluster](docs/images/umap_clusters.png) | ![Multi-gene grid](docs/images/features_grid.png) | ![Marker dotplot](docs/images/dotplot.png) |
+| UMAP (stored palette) | `plot_features` grid | `plot_dotplot` |
+| ![DE dotplot](docs/images/de_dotplot.png) | ![Volcano](docs/images/volcano.png) | ![Composition](docs/images/proportions.png) |
+| `plot_rank_genes_dotplot` | `plot_volcano` | `plot_proportions` |
+| ![Stacked violin](docs/images/stacked_violin.png) | ![QC violins](docs/images/qc_violin.png) | |
+| `plot_stacked_violin` | `plot_qc_violin` | |
+
 ## Design philosophy
 
 Three ideas, one for each dependency:
@@ -126,12 +140,20 @@ gene across two layers, extract it twice under different names yourself.)
 | Function | Purpose | Returns |
 |----------|---------|---------|
 | `gganndata(adata, aes(...))` | plotnine-native entrypoint | `plotnine.ggplot` |
-| `plot_embedding(adata, basis, color=...)` | UMAP/t-SNE/PCA scatter (density when `color=None`) | `plotnine.ggplot` |
+| `plot_embedding(adata, basis, color=..., split_by=...)` | UMAP/t-SNE/PCA scatter (density when `color=None`); `split_by` facets it | `plotnine.ggplot` |
+| `plot_features(adata, features, basis)` | multi-gene embedding grid (`sc.pl.umap(color=[...])`) | `plotnine.ggplot` |
 | `plot_dotplot(adata, genes, group_by)` | size = fraction expressing, colour = mean expression | `plotnine.ggplot` |
 | `plot_matrixplot(adata, genes, group_by)` | aggregated mean-expression heatmap (`geom_tile`) | `plotnine.ggplot` |
-| `plot_violin(adata, genes, group_by)` | per-group distributions, one facet per gene | `plotnine.ggplot` |
+| `plot_violin(adata, genes, group_by, stats=...)` | per-group distributions, one facet per gene | `plotnine.ggplot` |
+| `plot_stacked_violin` / `plot_tracksplot` | compact genes-as-rows marker summaries | `plotnine.ggplot` |
+| `plot_dotplot_grouped` / `plot_matrixplot_grouped` | dot/matrix plot with gene-group brackets | `plotnine.ggplot` |
+| `plot_rank_genes_dotplot` / `plot_rank_genes_heatmap` | top markers from `rank_genes_groups` | `plotnine.ggplot` |
+| `plot_volcano(adata, group)` | volcano from `rank_genes_groups` (reuses `ggvolcano`) | `plotnine.ggplot` |
+| `plot_proportions(adata, group_by, split_by=...)` | cell-type composition bars | `plotnine.ggplot` |
+| `plot_qc_violin` / `plot_qc_scatter` / `plot_highest_expr_genes` | QC-metric plots | `plotnine.ggplot` |
 | `plot_clustermap(adata, genes, group_by=..., annotations=...)` | clustered heatmap (escape hatch) | `ClusterMapPlotter` |
-| `theme_anngg()`, `scale_color_expression()`, `scale_color_celltype()` | theme & scales | plotnine objects |
+| `theme_anngg()`, `scale_color_expression()`, `scale_color_obs(adata, col)` | theme & scales (incl. scanpy stored palettes) | plotnine objects |
+| `Beside` / `Stack` / `Wrap` / `plot_layout` (re-exported) | multi-panel figure composition | plotnine-extra objects |
 
 ## Installation
 

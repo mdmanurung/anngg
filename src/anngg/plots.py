@@ -24,11 +24,18 @@ from plotnine import (
     scale_size,
 )
 
-from ._aggregate import aggregate_expression, expression_source
-from ._resolve import _densify, embedding_coords, plain_name, resolve_frame
+from ._aggregate import aggregate_expression, tidy_expression
+from ._palette import scale_color_obs, scale_fill_obs
+from ._resolve import embedding_coords, plain_name, resolve_frame
 from .theme import theme_anngg
 
-__all__ = ["plot_embedding", "plot_dotplot", "plot_matrixplot", "plot_violin"]
+__all__ = [
+    "plot_embedding",
+    "plot_features",
+    "plot_dotplot",
+    "plot_matrixplot",
+    "plot_violin",
+]
 
 
 def _is_numeric(series: pd.Series) -> bool:
@@ -42,6 +49,7 @@ def plot_embedding(
     basis: str = "umap",
     color: str | None = None,
     *,
+    split_by: str | None = None,
     layer: str | None = None,
     use_raw: bool | None = None,
     size: float = 1.5,
@@ -50,12 +58,14 @@ def plot_embedding(
     low: str = "#d9d9d9",
     high: str = "#2166ac",
 ):
-    """Scatter over an embedding (UMAP/t-SNE/PCA), optionally coloured.
+    """Scatter over an embedding (UMAP/t-SNE/PCA), optionally coloured and split.
 
     * ``color=None`` -> density-coloured scatter (``geom_pointdensity``), which
       reads well for dense embeddings.
-    * categorical ``color`` (e.g. an obs cluster column) -> discrete colours.
+    * categorical ``color`` (e.g. an obs cluster column) -> discrete colours
+      (reusing scanpy's stored palette when present).
     * numeric ``color`` (a gene or continuous obs column) -> a gradient.
+    * ``split_by`` -> facet the scatter over an obs column (Seurat ``split.by``).
     """
     coords = embedding_coords(adata, basis)
     if coords.shape[1] < 2:
@@ -65,17 +75,25 @@ def plot_embedding(
         )
     xcol, ycol = coords.columns[:2]
 
+    split_col = None
+    if split_by is not None:
+        split_col = resolve_frame(adata, [split_by])[[split_by]]
+
+    def _facet(plot):
+        return plot + pe.facet_wrap("~" + split_by) if split_by is not None else plot
+
     if color is None:
         if pointdensity is None:
             pointdensity = True
+        base = coords if split_col is None else coords.join(split_col)
         if pointdensity:
-            return (
-                ggplot(coords, aes(xcol, ycol))
+            return _facet(
+                ggplot(base, aes(xcol, ycol))
                 + pe.geom_pointdensity(size=size, alpha=alpha)
                 + labs(color="density")
                 + theme_anngg()
             )
-        return pe.DimPlot(coords, x=xcol, y=ycol, size=size, alpha=alpha) + theme_anngg()
+        return _facet(pe.DimPlot(base, x=xcol, y=ycol, size=size, alpha=alpha) + theme_anngg())
 
     # `color` may be a bare name, a prefix string ("gene:CD3D@logcounts") or an accessor
     cname = plain_name(adata, color)
@@ -83,18 +101,70 @@ def plot_embedding(
     if cname not in values.columns:
         raise KeyError(f"Could not resolve color={color!r} from obs, genes or obsm.")
     df = coords.join(values[[cname]])
+    if split_col is not None and split_by not in df.columns:
+        df = df.join(split_col)
 
     if _is_numeric(df[cname]):
         # Draw low-expression cells first so high-expression cells are not occluded
         # (mirrors scanpy's sc.pl.embedding ordering).
         df = df.sort_values(cname)
-        return (
+        return _facet(
             pe.FeatureDimPlot(
                 df, feature=cname, x=xcol, y=ycol, low=low, high=high, size=size, alpha=alpha
             )
             + theme_anngg()
         )
-    return pe.DimPlot(df, x=xcol, y=ycol, color=cname, size=size, alpha=alpha) + theme_anngg()
+    return _facet(
+        pe.DimPlot(df, x=xcol, y=ycol, color=cname, size=size, alpha=alpha)
+        + scale_color_obs(adata, cname)
+        + theme_anngg()
+    )
+
+
+def plot_features(
+    adata,
+    features: Sequence[str],
+    basis: str = "umap",
+    *,
+    layer: str | None = None,
+    use_raw: bool | None = None,
+    ncol: int | None = None,
+    size: float = 1.2,
+    alpha: float = 0.9,
+    cmap: str = "magma",
+):
+    """Multi-gene embedding grid: one faceted panel per feature.
+
+    Panels share a single expression colour scale, which is best for comparing
+    magnitudes *across* genes. Because the scale is shared, a low-range gene shown
+    next to a high-range one will look faint -- for independent per-gene colour
+    bars (like ``sc.pl.umap(color=[...])``), compose separate ``plot_embedding``
+    calls with the re-exported ``Wrap`` / ``plot_layout`` instead.
+    """
+    coords = embedding_coords(adata, basis)
+    if coords.shape[1] < 2:
+        raise ValueError(f"Embedding '{basis}' has fewer than 2 dimensions.")
+    xcol, ycol = coords.columns[:2]
+
+    values = resolve_frame(adata, list(features), layer=layer, use_raw=use_raw)
+    feats = list(
+        dict.fromkeys(f for f in features if f in values.columns and _is_numeric(values[f]))
+    )
+    if not feats:
+        raise ValueError("plot_features needs at least one numeric feature (gene or metric).")
+
+    df = coords.join(values[feats])
+    long = df.melt(
+        id_vars=[xcol, ycol], value_vars=feats, var_name="feature", value_name="expression"
+    ).sort_values("expression")
+    long["feature"] = pd.Categorical(long["feature"], categories=feats, ordered=True)
+    return (
+        ggplot(long, aes(xcol, ycol, color="expression"))
+        + geom_point(size=size, alpha=alpha)
+        + pe.facet_wrap("~feature", ncol=ncol)
+        + scale_color_cmap(cmap_name=cmap)
+        + theme_anngg()
+    )
 
 
 def _group_categories(adata, group_by: str):
@@ -226,25 +296,28 @@ def plot_violin(
     use_raw: bool | None = None,
     ncol: int = 1,
     scale: str = "width",
+    stats: bool = False,
     categories_order: Iterable[str] | None = None,
 ):
-    """Per-group expression distributions, one facet per gene (stacked-violin style)."""
+    """Per-group expression distributions, one facet per gene (stacked-violin style).
+
+    Set ``stats=True`` to overlay a group-comparison test via plotnine-extra's
+    ``stat_compare_means``.
+    """
     genes = list(genes)
-    kind, lyr = expression_source(adata, layer, use_raw)
-    if kind == "raw":
-        tidy = adata.ap.to_tidy(obs=[group_by], raw=genes)
-    else:
-        tidy = adata.ap.to_tidy(obs=[group_by], x=genes, layer=lyr)
-    tidy = _densify(tidy)
-    tidy["feature"] = pd.Categorical(tidy["feature"], categories=genes, ordered=True)
+    tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw)
     if categories_order is None:
         categories_order = _group_categories(adata, group_by)
     tidy = _order_groups(tidy, group_by, categories_order)
-    return (
+    plot = (
         ggplot(tidy, aes(group_by, "value", fill=group_by))
         + geom_violin(scale=scale)
         + pe.facet_wrap("~feature", ncol=ncol, scales="free_y")
+        + scale_fill_obs(adata, group_by)
         + labs(x="", y="expression", fill=group_by)
         + theme_anngg()
         + pe.rotate_x_text(45)
     )
+    if stats:
+        plot = plot + pe.stat_compare_means()
+    return plot
