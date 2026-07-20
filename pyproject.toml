@@ -18,7 +18,7 @@ dependencies = [
     "numpy>=1.23",
     "pandas>=1.5",
     "plotnine>=0.15.3,<0.17",
-    "plotnine-extra>=0.3",
+    "plotnine-extra @ git+https://github.com/mdmanurung/plotnine-extra",
     "annplyr @ git+https://github.com/mdmanurung/annplyr",
 ]
 
