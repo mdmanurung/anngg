@@ -128,6 +128,9 @@ The grammar entry point and the aesthetic-resolution escapes.
    :nosignatures:
 
    theme_anngg
+   set_theme
+   reset_theme
+   sizes
    scale_color_obs
    scale_fill_obs
    obs_colors
