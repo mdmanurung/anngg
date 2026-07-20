@@ -65,9 +65,11 @@ def plot_proportions(
         )
 
     xvar = split_by if split_by else group_by
+    # thin white borders separate the stacked segments cleanly (scplotter-style)
+    col_kw = {"color": "white", "size": 0.15} if position != "dodge" else {}
     return (
         ggplot(counts, aes(xvar, "value", fill=group_by))
-        + geom_col(position=position)
+        + geom_col(position=position, width=0.9, **col_kw)
         + scale_fill_obs(adata, group_by)
         + labs(x="", y=ylab, fill=group_by)
         + theme_anngg()

@@ -10,10 +10,13 @@ plotnine-extra's ``ggvolcano``.
 from __future__ import annotations
 
 import plotnine_extra as pe
-from plotnine import labs
+from plotnine import labs, scale_color_manual
 
 from .plots import plot_dotplot, plot_matrixplot
 from .theme import theme_anngg
+
+# Conventional volcano colours: down = blue, non-significant = grey, up = red.
+_VOLCANO_COLORS = {"down": "#3B4CC0", "not significant": "#B8B8B8", "up": "#B40426"}
 
 __all__ = [
     "rank_genes_df",
@@ -109,6 +112,7 @@ def plot_volcano(
             df, x="logfoldchanges", y="pvals_adj", label="names",
             p_cutoff=padj, fc_cutoff=lfc, label_top=label_top, **kwargs,
         )
+        + scale_color_manual(values=_VOLCANO_COLORS)
         + labs(x="log2 fold change", y="-log10(adjusted p-value)")
         + theme_anngg()
     )
