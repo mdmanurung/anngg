@@ -51,6 +51,7 @@ from .plots import (
     plot_violin,
 )
 from .qc import plot_highest_expr_genes, plot_qc_scatter, plot_qc_violin
+from .ridge import plot_ridge
 from .upset import plot_upset
 from .theme import (
     scale_color_celltype,
@@ -79,6 +80,7 @@ __all__ = [
     "plot_dotplot",
     "plot_matrixplot",
     "plot_violin",
+    "plot_ridge",
     "plot_clustermap",
     "plot_proportions",
     "rank_genes_df",

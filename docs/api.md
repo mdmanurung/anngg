@@ -45,6 +45,7 @@ The grammar entry point and the aesthetic-resolution escapes.
    plot_matrixplot
    plot_matrixplot_grouped
    plot_violin
+   plot_ridge
    plot_stacked_violin
    plot_tracksplot
    plot_clustermap
