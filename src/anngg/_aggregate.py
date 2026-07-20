@@ -25,18 +25,20 @@ __all__ = ["aggregate_expression", "expression_source", "group_means", "tidy_exp
 StandardScale = Literal["var", "group", "zscore"]
 
 
-def tidy_expression(adata, genes, group_by, *, layer=None, use_raw=None):
-    """Long per-cell expression ``[obs_name, feature, value, group_by]`` via annplyr.
+def tidy_expression(adata, genes, group_by, *, layer=None, use_raw=None, extra_obs=()):
+    """Long per-cell expression ``[obs_name, feature, value, group_by, *extra_obs]``.
 
     Shared by the violin / stacked-violin / tracksplot paths so the source
-    picking, densification and feature-ordering live in one place.
+    picking, densification and feature-ordering live in one place. ``extra_obs``
+    carries additional obs columns (e.g. a ``split_by`` facet) into the frame.
     """
     genes = list(genes)
+    obs = list(dict.fromkeys([group_by, *extra_obs]))  # dedupe, keep order
     kind, lyr = resolve_source(adata, layer, use_raw)
     if kind == "raw":
-        tidy = adata.ap.to_tidy(obs=[group_by], raw=genes)
+        tidy = adata.ap.to_tidy(obs=obs, raw=genes)
     else:
-        tidy = adata.ap.to_tidy(obs=[group_by], x=genes, layer=lyr)
+        tidy = adata.ap.to_tidy(obs=obs, x=genes, layer=lyr)
     tidy = _densify(tidy)
     tidy["feature"] = pd.Categorical(tidy["feature"], categories=genes, ordered=True)
     return tidy
@@ -102,39 +104,43 @@ def aggregate_expression(
     use_raw: bool | None = None,
     expression_cutoff: float = 0.0,
     standard_scale: StandardScale | None = None,
+    extra_by: Iterable[str] = (),
 ) -> pd.DataFrame:
-    """Return a long DataFrame ``[group_by, feature, mean_expression, fraction]``.
+    """Return a long DataFrame ``[group_by, *extra_by, feature, mean_expression, fraction]``.
 
     ``feature`` is an ordered categorical following the order of ``genes`` so
-    downstream plots keep the requested gene order. ``standard_scale`` may be
+    downstream plots keep the requested gene order. ``extra_by`` adds grouping
+    columns (e.g. a ``split_by`` facet) so means/fractions are computed per
+    ``group_by`` × ``extra_by`` combination. ``standard_scale`` may be
     ``'var'`` / ``'group'`` (scanpy conventions) or ``'zscore'`` (an anngg
     extension); ``None`` leaves the raw group means untouched.
     """
     genes = list(genes)
+    by = list(dict.fromkeys([group_by, *extra_by]))  # dedupe, keep order
     kind, lyr = expression_source(adata, layer, use_raw)
 
     mean_expr = {g: ap.mean(ap.col(g)) for g in genes}
     frac_expr = {g: ap.mean(ap.col(g) > expression_cutoff) for g in genes}
 
     if kind == "raw":
-        mean_df = adata.ap.summarize(raw=mean_expr, by=group_by)
-        frac_df = adata.ap.summarize(raw=frac_expr, by=group_by)
+        mean_df = adata.ap.summarize(raw=mean_expr, by=by)
+        frac_df = adata.ap.summarize(raw=frac_expr, by=by)
     else:
-        mean_df = adata.ap.summarize(x=mean_expr, by=group_by, layer=lyr)
-        frac_df = adata.ap.summarize(x=frac_expr, by=group_by, layer=lyr)
+        mean_df = adata.ap.summarize(x=mean_expr, by=by, layer=lyr)
+        frac_df = adata.ap.summarize(x=frac_expr, by=by, layer=lyr)
 
-    mean_df = _densify(mean_df).set_index(group_by)[genes].astype(float)
-    frac_df = _densify(frac_df).set_index(group_by)[genes].astype(float)
+    mean_df = _densify(mean_df).set_index(by)[genes].astype(float)
+    frac_df = _densify(frac_df).set_index(by)[genes].astype(float)
     mean_df = _standardize(mean_df, standard_scale)
 
     long = (
         mean_df.reset_index()
-        .melt(id_vars=group_by, var_name="feature", value_name="mean_expression")
+        .melt(id_vars=by, var_name="feature", value_name="mean_expression")
         .merge(
             frac_df.reset_index().melt(
-                id_vars=group_by, var_name="feature", value_name="fraction"
+                id_vars=by, var_name="feature", value_name="fraction"
             ),
-            on=[group_by, "feature"],
+            on=[*by, "feature"],
         )
     )
     long["feature"] = pd.Categorical(long["feature"], categories=genes, ordered=True)

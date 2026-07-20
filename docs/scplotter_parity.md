@@ -92,7 +92,8 @@ ggplot(coords, aes(x, y)) + geom_bin2d(bins=28) + scale_fill_cmap("magma")      
 | 43 | `plot_type="dot"` | ✅ `plot_dotplot` |
 | 45 | `plot_type="cor"` | ✅ `plot_correlation` |
 | 6, 7 | `add_trend` / `add_stat` | 🟡 compose (`+ geom_line` / `+ stat_summary`) |
-| 8 | `group_by` stratify (dodge) | 🟡 compose (grammar) |
+| 8 | `split_by` facet on stat plots | ✅ `split_by=` on violin/box/dotplot/matrixplot/bar |
+| 3 | `agg` (custom bar aggregation) | ✅ `agg=` on `plot_expression_bar` / `plot_expression_line` |
 | 21–24 | dim + density / hex | 🟡 compose (as for CellDimPlot) |
 | 30–32 | dim quantile / cutoff colour scaling | 🟡 compose (`+ scale_*`) |
 | 37–42 | annotated heatmap: bars/dot/violin cells, pie/violin annotations | 🟡 `plot_clustermap` (PyComplexHeatmap) covers most |

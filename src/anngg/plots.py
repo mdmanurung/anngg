@@ -51,6 +51,17 @@ def _is_numeric(series: pd.Series) -> bool:
     )
 
 
+def _feature_facet(split_by: str | None, *, ncol: int = 1, scales: str = "free_y"):
+    """Facet by feature, adding a ``split_by`` column dimension when given.
+
+    ``split_by=None`` -> one wrapped panel per gene; ``split_by`` set -> a grid of
+    gene (rows) x split level (columns), like scplotter's ``FeatureStatPlot(split_by=)``.
+    """
+    if split_by is None:
+        return pe.facet_wrap("~feature", ncol=ncol, scales=scales)
+    return pe.facet_grid(f"feature ~ {split_by}", scales=scales)
+
+
 def _embedding_axes():
     """Hide the tick numbers on embeddings -- UMAP/t-SNE units are arbitrary,
 
@@ -281,6 +292,7 @@ def plot_dotplot(
     genes: Sequence[str],
     group_by: str,
     *,
+    split_by: str | None = None,
     layer: str | None = None,
     use_raw: bool | None = None,
     standard_scale: str | None = None,
@@ -291,8 +303,10 @@ def plot_dotplot(
 ):
     """Marker dotplot: dot *size* = fraction expressing, *colour* = mean expression.
 
-    Defaults to ``adata.raw`` so values match ``sc.pl.dotplot``.
+    Defaults to ``adata.raw`` so values match ``sc.pl.dotplot``. ``split_by`` adds a
+    facet column so the dotplot is repeated per split level (scplotter ``split_by``).
     """
+    extra = [split_by] if split_by else []
     agg = aggregate_expression(
         adata,
         genes,
@@ -301,12 +315,13 @@ def plot_dotplot(
         use_raw=use_raw,
         expression_cutoff=expression_cutoff,
         standard_scale=standard_scale,
+        extra_by=extra,
     )
     if categories_order is None:
         categories_order = _group_categories(adata, group_by)
     agg = _order_groups(agg, group_by, categories_order)
     color_lab = "scaled\nexpression" if standard_scale else "mean\nexpression"
-    return (
+    plot = (
         ggplot(agg, aes("feature", group_by))
         + geom_point(aes(size="fraction", color="mean_expression"))
         + scale_color_cmap(cmap_name=cmap)
@@ -315,6 +330,7 @@ def plot_dotplot(
         + theme_anngg()
         + pe.rotate_x_text(45)
     )
+    return plot + pe.facet_wrap(f"~{split_by}") if split_by else plot
 
 
 def plot_matrixplot(
@@ -322,6 +338,7 @@ def plot_matrixplot(
     genes: Sequence[str],
     group_by: str,
     *,
+    split_by: str | None = None,
     layer: str | None = None,
     use_raw: bool | None = None,
     standard_scale: str | None = None,
@@ -332,8 +349,10 @@ def plot_matrixplot(
 
     Like ``sc.pl.matrixplot``, this defaults to ``standard_scale=None`` (raw group
     means). Pass ``standard_scale="var"`` to rescale each gene to ``[0, 1]``, which
-    keeps cross-gene patterns legible when magnitudes differ widely.
+    keeps cross-gene patterns legible when magnitudes differ widely. ``split_by``
+    adds a facet column so the heatmap is repeated per split level.
     """
+    extra = [split_by] if split_by else []
     agg = aggregate_expression(
         adata,
         genes,
@@ -341,12 +360,13 @@ def plot_matrixplot(
         layer=layer,
         use_raw=use_raw,
         standard_scale=standard_scale,
+        extra_by=extra,
     )
     if categories_order is None:
         categories_order = _group_categories(adata, group_by)
     agg = _order_groups(agg, group_by, categories_order)
     color_lab = "scaled\nexpression" if standard_scale else "mean\nexpression"
-    return (
+    plot = (
         ggplot(agg, aes("feature", group_by, fill="mean_expression"))
         + geom_tile()
         + scale_fill_cmap(cmap_name=cmap)
@@ -354,6 +374,7 @@ def plot_matrixplot(
         + theme_anngg()
         + pe.rotate_x_text(45)
     )
+    return plot + pe.facet_wrap(f"~{split_by}") if split_by else plot
 
 
 def plot_violin(
@@ -361,6 +382,7 @@ def plot_violin(
     genes: Sequence[str],
     group_by: str,
     *,
+    split_by: str | None = None,
     layer: str | None = None,
     use_raw: bool | None = None,
     ncol: int = 1,
@@ -375,11 +397,13 @@ def plot_violin(
     ``add_box=True`` (default) nests a slim white boxplot inside each violin so the
     median and quartiles read off cleanly, the way scplotter's ``FeatureStatPlot``
     does. ``add_points=True`` overlays the individual cells as jitter (scplotter's
-    ``add_point``). Set ``stats=True`` to overlay a group-comparison test via
-    plotnine-extra's ``stat_compare_means``.
+    ``add_point``). ``split_by`` adds a facet column (gene rows x split columns).
+    Set ``stats=True`` to overlay a group-comparison test via plotnine-extra's
+    ``stat_compare_means``.
     """
     genes = list(genes)
-    tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw)
+    extra = [split_by] if split_by else []
+    tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw, extra_obs=extra)
     if categories_order is None:
         categories_order = _group_categories(adata, group_by)
     tidy = _order_groups(tidy, group_by, categories_order)
@@ -391,7 +415,7 @@ def plot_violin(
         plot = plot + geom_jitter(width=0.2, height=0.0, size=0.3, alpha=0.25, stroke=0)
     plot = (
         plot
-        + pe.facet_wrap("~feature", ncol=ncol, scales="free_y")
+        + _feature_facet(split_by, ncol=ncol)
         + scale_fill_obs(adata, group_by)
         + labs(x="", y="expression", fill=group_by)
         + theme_anngg()
