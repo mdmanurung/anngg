@@ -9,9 +9,9 @@ don't cover.
 from __future__ import annotations
 
 import plotnine_extra as pe
-from plotnine import aes, geom_col, ggplot, labs
+from plotnine import aes, geom_area, geom_col, geom_line, geom_point, ggplot, labs
 
-from ._palette import scale_fill_obs
+from ._palette import scale_color_obs, scale_fill_obs
 from .plots import _group_categories, _order_groups
 from .theme import theme_anngg
 
@@ -23,12 +23,13 @@ def plot_proportions(
     group_by: str,
     split_by: str | None = None,
     *,
+    kind: str = "bar",
     normalize: bool = True,
     position: str = "stack",
     categories_order=None,
     split_order=None,
 ):
-    """Bar plot of cell-type composition.
+    """Cell-type composition across an optional ``split_by`` axis.
 
     Parameters
     ----------
@@ -37,11 +38,20 @@ def plot_proportions(
     split_by
         Optional obs column for the x-axis (e.g. sample or condition); when
         omitted, one bar per ``group_by`` category.
+    kind
+        ``"bar"`` (default), ``"area"`` (stacked area across ``split_by``) or
+        ``"trend"`` (a line per group across ``split_by``). ``"area"``/``"trend"``
+        require ``split_by``. (Pie/donut/radar are not available -- plotnine has
+        no polar coordinate system.)
     normalize
         Plot within-``split_by`` proportions (summing to 1) instead of raw counts.
     position
-        ``"stack"`` (default), ``"fill"`` (100 %), or ``"dodge"``.
+        Bar stacking: ``"stack"`` (default), ``"fill"`` (100 %), or ``"dodge"``.
     """
+    if kind not in ("bar", "area", "trend"):
+        raise ValueError(f"kind must be 'bar', 'area' or 'trend', got {kind!r}")
+    if kind in ("area", "trend") and split_by is None:
+        raise ValueError(f"kind={kind!r} needs split_by (the x-axis to trend across).")
     by = [split_by, group_by] if split_by else [group_by]
     counts = adata.ap.count(by=by)
 
@@ -66,6 +76,26 @@ def plot_proportions(
         )
 
     xvar = split_by if split_by else group_by
+
+    if kind == "trend":
+        return (
+            ggplot(counts, aes(xvar, "value", color=group_by, group=group_by))
+            + geom_line()
+            + geom_point(size=2)
+            + scale_color_obs(adata, group_by)
+            + labs(x="", y=ylab, color=group_by)
+            + theme_anngg()
+            + pe.rotate_x_text(45)
+        )
+    if kind == "area":
+        return (
+            ggplot(counts, aes(xvar, "value", fill=group_by, group=group_by))
+            + geom_area(position=position, color="white", size=0.15)
+            + scale_fill_obs(adata, group_by)
+            + labs(x="", y=ylab, fill=group_by)
+            + theme_anngg()
+            + pe.rotate_x_text(45)
+        )
     # thin white borders separate the stacked segments cleanly (scplotter-style)
     col_kw = {"color": "white", "size": 0.15} if position != "dodge" else {}
     return (

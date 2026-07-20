@@ -97,7 +97,7 @@ ggplot(coords, aes(x, y)) + geom_bin2d(bins=28) + scale_fill_cmap("magma")      
 | 21–24 | dim + density / hex | 🟡 compose (as for CellDimPlot) |
 | 30–32 | dim quantile / cutoff colour scaling | 🟡 compose (`+ scale_*`) |
 | 37–42 | annotated heatmap: bars/dot/violin cells, pie/violin annotations | 🟡 `plot_clustermap` (PyComplexHeatmap) covers most |
-| 4 | `ridge` | ❌ no ridgeline geom |
+| 4 | `ridge` | ✅ `plot_ridge` (KDE ridgeline built on `geom_ribbon`) |
 | 25–27 | dim + pseudotime lineages | ❌ needs lineage fits |
 | 46 | `cor` pairs matrix | ❌ no pairs geom |
 

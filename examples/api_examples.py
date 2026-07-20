@@ -51,6 +51,7 @@ def _examples(adata):
         "anngg.plot_matrixplot": lambda: ag.plot_matrixplot(adata, MARKERS, GROUP, standard_scale="var"),
         "anngg.plot_matrixplot_grouped": lambda: ag.plot_matrixplot_grouped(adata, GENE_GROUPS, GROUP),
         "anngg.plot_violin": lambda: ag.plot_violin(adata, MARKERS[:3], GROUP),
+        "anngg.plot_ridge": lambda: ag.plot_ridge(adata, MARKERS[:3], GROUP),
         "anngg.plot_stacked_violin": lambda: ag.plot_stacked_violin(adata, MARKERS, GROUP),
         "anngg.plot_tracksplot": lambda: ag.plot_tracksplot(adata, MARKERS, GROUP),
         "anngg.plot_box": lambda: ag.plot_box(adata, MARKERS[:3], GROUP),
