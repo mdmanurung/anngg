@@ -18,3 +18,4 @@ examples/_phase1/
 # Sphinx docs build artifacts
 docs/_build/
 docs/generated/
+!docs/images/compare/*.png
