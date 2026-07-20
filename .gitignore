@@ -20,3 +20,4 @@ docs/_build/
 docs/generated/
 !docs/images/compare/*.png
 !docs/images/scplotter/*.png
+!docs/images/api/*.png
