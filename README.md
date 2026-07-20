@@ -75,6 +75,11 @@ non-overlapping labels, via `plotnine-extra`).
 dependencies — install them with `pip install anngg[density]` /
 `anngg[upset]`.
 
+Every plotnine-native helper is just a stack of grammar layers.
+[`examples/grammar_equivalents.py`](examples/grammar_equivalents.py) rebuilds
+each one from `gganndata(adata, aes(...)) + geom_* + scale_* + theme` so you can
+see there is no magic and drop down to raw grammar whenever you need to.
+
 ## Design philosophy
 
 Three ideas, one for each dependency:
