@@ -51,6 +51,7 @@ from .plots import (
     plot_violin,
 )
 from .qc import plot_highest_expr_genes, plot_qc_scatter, plot_qc_violin
+from .upset import plot_upset
 from .theme import (
     scale_color_celltype,
     scale_color_expression,
@@ -97,6 +98,7 @@ __all__ = [
     "plot_expression_bar",
     "plot_expression_line",
     "plot_correlation",
+    "plot_upset",
     "theme_anngg",
     "scale_color_expression",
     "scale_colour_expression",
