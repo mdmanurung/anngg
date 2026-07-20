@@ -46,6 +46,7 @@ from .de import (
 from .density import plot_density
 from .distributions import plot_box, plot_expression_bar, plot_expression_line
 from .grammar import aes, gganndata
+from .layout import compose, tag_panels
 from .markers import (
     plot_dotplot_grouped,
     plot_matrixplot_grouped,
@@ -128,6 +129,8 @@ __all__ = [
     "scale_color_obs",
     "scale_colour_obs",
     "scale_fill_obs",
+    "compose",
+    "tag_panels",
     "Beside",
     "Stack",
     "Wrap",

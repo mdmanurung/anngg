@@ -61,10 +61,19 @@ in pt) so text in annotations stays in sync — convert to `geom_text`'s mm unit
 
 ## Composing panels
 
-`anngg` re-exports plotnine-extra's layout operators, so multi-panel figures
-with independent scales are one expression:
+`ag.compose` assembles a tagged multi-panel figure from a list of plots (each
+keeps its own scales), which you then save at an exact physical size:
 
 ```python
-from anngg import Wrap
-Wrap([ag.plot_embedding(adata, "umap", color=g) for g in ["CD3D", "NKG7"]])
+fig = ag.compose(
+    [ag.plot_embedding(adata, "umap", color="bulk_labels"),
+     ag.plot_dotplot(adata, markers, "bulk_labels"),
+     ag.plot_violin(adata, markers[:1], "bulk_labels"),
+     ag.plot_proportions(adata, "bulk_labels", split_by="phase")],
+    ncol=2,                 # A/B/C/D panel tags by default
+)
+fig.save("figure1.pdf", width=180, height=140, units="mm")   # millimetre-exact output
 ```
+
+`tag_levels=` switches the labels (`"a"`, `"1"`, `"i"`, or `None`), and
+`ag.tag_panels(plots)` tags a list you compose by hand with plotnine's `|` / `/`.
