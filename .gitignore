@@ -21,3 +21,4 @@ docs/generated/
 !docs/images/compare/*.png
 !docs/images/scplotter/*.png
 !docs/images/api/*.png
+!docs/images/scanpy/*.png

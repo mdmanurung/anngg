@@ -68,6 +68,7 @@ quickstart
 gallery
 comparisons
 scplotter_parity
+scanpy_parity
 stats_pseudobulk
 ```
 
