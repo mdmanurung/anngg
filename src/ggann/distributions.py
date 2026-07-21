@@ -30,7 +30,13 @@ from plotnine import (
 from ._aggregate import tidy_expression
 from ._palette import scale_color_obs, scale_fill_obs
 from ._resolve import plain_name, resolve_frame
-from .plots import _feature_facet, _group_categories, _is_numeric, _order_groups
+from .plots import (
+    _downsample_cells,
+    _feature_facet,
+    _group_categories,
+    _is_numeric,
+    _order_groups,
+)
 from .theme import theme_ggann
 
 __all__ = ["plot_box", "plot_expression_bar", "plot_expression_line"]
@@ -71,13 +77,20 @@ def plot_box(
     jitter_alpha: float = 0.25,
     stats: bool = False,
     categories_order: Sequence[str] | None = None,
+    downsample: int | None = None,
 ):
     """Per-group expression box plots, one facet per gene, with jittered cells overlaid.
 
     Set ``jitter=False`` for a plain box plot, ``split_by`` for a gene x split facet
     grid, or ``stats=True`` to overlay a group-comparison test via plotnine-extra's
-    ``stat_compare_means``.
+    ``stat_compare_means``. Pass ``downsample=N`` to cap cells per group before the
+    (jitter) draw for large data — see :func:`ggann.plot_violin`.
+
+    Note: ``downsample`` subsets the cells the geoms see, so with ``stats=True``
+    the p-value is computed on the subsample, and the boxplot's outliers reflect
+    only the kept cells. Leave it unset when either must reflect every cell.
     """
+    adata = _downsample_cells(adata, group_by, downsample)
     genes = list(genes)
     extra = [split_by] if split_by else []
     tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw, extra_obs=extra)

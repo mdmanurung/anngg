@@ -25,7 +25,13 @@ from plotnine import (
 
 from ._aggregate import tidy_expression
 from ._palette import scale_fill_obs
-from .plots import _group_categories, _order_groups, plot_dotplot, plot_matrixplot
+from .plots import (
+    _downsample_cells,
+    _group_categories,
+    _order_groups,
+    plot_dotplot,
+    plot_matrixplot,
+)
 from .theme import theme_ggann
 
 __all__ = [
@@ -90,8 +96,14 @@ def plot_stacked_violin(
     use_raw: bool | None = None,
     scale: str = "width",
     categories_order=None,
+    downsample: int | None = None,
 ):
-    """Compact genes-as-rows violin grid across groups (``sc.pl.stacked_violin``)."""
+    """Compact genes-as-rows violin grid across groups (``sc.pl.stacked_violin``).
+
+    Pass ``downsample=N`` to cap cells per group before the KDE for large data —
+    the violin family is plotnine's slowest geom; see :func:`ggann.plot_violin`.
+    """
+    adata = _downsample_cells(adata, group_by, downsample)
     genes = list(genes)
     tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw)
     tidy = _order_groups(tidy, group_by, categories_order or _group_categories(adata, group_by))
