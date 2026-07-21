@@ -64,7 +64,11 @@ def _downsample_cells(adata, group_by: str | None, n: int | None, *, seed: int =
     """
     import numpy as np
 
-    if not n or adata.n_obs <= n:
+    if n is None:
+        return adata
+    if n < 1:
+        raise ValueError(f"downsample must be a positive integer, got {n}.")
+    if adata.n_obs <= n:
         return adata
     rng = np.random.RandomState(seed)
     if group_by is None:
@@ -324,6 +328,19 @@ def _order_groups(frame: pd.DataFrame, group_by: str, categories_order):
     return frame
 
 
+def _cell_rank(tidy: pd.DataFrame, group_by: str) -> pd.DataFrame:
+    """Add a ``cell_rank`` column that orders cells by their ``group_by`` category.
+
+    Cells are sorted by group then numbered 0..N-1, so a per-cell x layout reads
+    left-to-right by group. Shared by :func:`plot_heatmap` and
+    ``markers.plot_tracksplot``.
+    """
+    cell = tidy[["obs_name", group_by]].drop_duplicates().sort_values(group_by)
+    cell = cell.reset_index(drop=True)
+    cell["cell_rank"] = range(len(cell))
+    return tidy.merge(cell[["obs_name", "cell_rank"]], on="obs_name")
+
+
 def plot_dotplot(
     adata,
     genes: Sequence[str],
@@ -492,6 +509,7 @@ def plot_embedding_density(
     than reading a pre-computed ``sc.tl.embedding_density`` result, so it is a
     native alternative rather than a byte-for-byte reproduction of scanpy's output.
     """
+    import numpy as np
     from scipy.stats import gaussian_kde
 
     adata = _downsample_cells(adata, group_by, downsample)
@@ -501,13 +519,13 @@ def plot_embedding_density(
     xcol, ycol = coords.columns[:2]
 
     def _density(sub: pd.DataFrame) -> pd.Series:
-        xy = sub[[xcol, ycol]].to_numpy().T
+        xy = sub[[xcol, ycol]].to_numpy().T  # shape (2, n_cells)
         # KDE needs >2 points and some spread; degenerate groups get a flat density
-        if xy.shape[1] < 3 or float(pd.DataFrame(xy.T).std().min()) == 0.0:
+        if xy.shape[1] < 3 or float(xy.std(axis=1).min()) == 0.0:
             return pd.Series(0.0, index=sub.index)
         try:
             d = gaussian_kde(xy)(xy)
-        except Exception:  # singular covariance etc. -- fall back to flat
+        except np.linalg.LinAlgError:  # singular covariance -- fall back to flat
             return pd.Series(0.0, index=sub.index)
         lo, hi = float(d.min()), float(d.max())
         d = (d - lo) / (hi - lo) if hi > lo else d * 0.0
@@ -571,10 +589,7 @@ def plot_heatmap(
         fill_lab = "expression"
 
     # order cells by group, then give each a rank so tiles sit side by side
-    cell = tidy[["obs_name", group_by]].drop_duplicates().sort_values(group_by)
-    cell = cell.reset_index(drop=True)
-    cell["cell_rank"] = range(len(cell))
-    tidy = tidy.merge(cell[["obs_name", "cell_rank"]], on="obs_name")
+    tidy = _cell_rank(tidy, group_by)
     tidy["feature"] = pd.Categorical(tidy["feature"], categories=list(reversed(genes)), ordered=True)
 
     return (

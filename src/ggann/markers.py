@@ -26,6 +26,7 @@ from plotnine import (
 from ._aggregate import tidy_expression
 from ._palette import scale_fill_obs
 from .plots import (
+    _cell_rank,
     _downsample_cells,
     _group_categories,
     _order_groups,
@@ -134,10 +135,7 @@ def plot_tracksplot(
     tidy = _order_groups(tidy, group_by, categories_order or _group_categories(adata, group_by))
 
     # order cells by group so each track reads left-to-right by group
-    cell = tidy[["obs_name", group_by]].drop_duplicates().sort_values(group_by)
-    cell = cell.reset_index(drop=True)
-    cell["cell_rank"] = range(len(cell))
-    tidy = tidy.merge(cell[["obs_name", "cell_rank"]], on="obs_name")
+    tidy = _cell_rank(tidy, group_by)
 
     return (
         ggplot(tidy, aes("cell_rank", "value", fill=group_by))

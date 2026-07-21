@@ -153,8 +153,18 @@ def plot_sina(
     # mutates its shared ``bins`` param across panels (the second facet then gets
     # an array where a scalar is expected and crashes). The binwidth branch reads
     # an untouched param each panel, so it is multi-facet safe.
-    span = float(tidy["value"].max() - tidy["value"].min())
-    binwidth = span / bins if span > 0 else 1.0
+    #
+    # Size the binwidth off the NARROWEST gene's range (÷ bins) so every facet
+    # gets ~``bins`` bins -- a single global span sized off the widest gene would
+    # collapse a narrow-range gene's panel to one or two bins. Floor it by the
+    # widest gene's range so a pathologically narrow gene can't drive the widest
+    # panel to an unbounded bin count (which would be slow to build).
+    ranges = tidy.groupby("feature", observed=True)["value"].agg(lambda s: s.max() - s.min())
+    ranges = ranges[ranges > 0]
+    if len(ranges):
+        binwidth = max(float(ranges.min()) / bins, float(ranges.max()) / 1000)
+    else:
+        binwidth = 1.0
 
     plot = ggplot(tidy, aes(group_by, "value", color=group_by))
     if violin:

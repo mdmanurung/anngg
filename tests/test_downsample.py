@@ -28,6 +28,14 @@ def test_downsample_noop_paths(adata, group_key):
     assert _downsample_cells(adata, group_key, adata.n_obs + 1) is adata
 
 
+def test_downsample_rejects_nonpositive(adata, group_key):
+    import pytest
+
+    for bad in (0, -5):
+        with pytest.raises(ValueError):
+            _downsample_cells(adata, group_key, bad)
+
+
 def test_downsample_is_deterministic(adata, group_key):
     a = _downsample_cells(adata, group_key, 15)
     b = _downsample_cells(adata, group_key, 15)

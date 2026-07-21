@@ -160,10 +160,9 @@ def plot_ma(
     if missing:
         raise KeyError(f"plot_ma: columns {missing} not in the results table.")
 
-    df = data.copy()
-    df["significant"] = (df[pval] < padj) & df[pval].notna()
-    # drop rows with no mean expression -- they can't sit on a log x axis
-    df = df[df[mean] > 0]
+    # drop rows with no mean expression (can't sit on a log x axis); assign the
+    # significance flag without a second full-frame copy
+    df = data[data[mean] > 0].assign(significant=lambda d: (d[pval] < padj) & d[pval].notna())
 
     plot = (
         ggplot(df, aes(mean, lfc, color="significant"))
@@ -171,13 +170,12 @@ def plot_ma(
         + geom_hline(yintercept=0, linetype="dashed", color="#4d4d4d")
         + scale_x_log10()
         + scale_color_manual(values=_MA_COLORS, labels={True: "sig.", False: "n.s."})
-        + labs(x="mean expression", y="log2 fold change", color=f"padj < {padj}")
+        + labs(x="mean expression", y="log2 fold change", color=f"{pval} < {padj}")
         + theme_ggann()
     )
     if label_top:
-        sig = df[df["significant"]].copy()
-        sig["_abs"] = sig[lfc].abs()
-        top = sig.sort_values("_abs", ascending=False).head(label_top)
+        sig = df[df["significant"]]
+        top = sig.sort_values(lfc, key=lambda s: s.abs(), ascending=False).head(label_top)
         if label is not None:
             top = top.assign(_lab=top[label])
         else:
