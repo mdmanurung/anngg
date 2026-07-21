@@ -91,6 +91,14 @@ def test_dendrogram_bad_orientation(adata, group_key):
         ag.plot_dendrogram(adata, group_key, orientation="sideways")
 
 
+def test_dendrogram_custom_key_autocomputes_into_that_key(adata, group_key):
+    ad = adata.copy()
+    ad.uns.pop(f"dendrogram_{group_key}", None)
+    plot = ag.plot_dendrogram(ad, group_key, key="my_dendro")
+    assert "my_dendro" in ad.uns  # written where it is then read (was a KeyError)
+    plot._build()
+
+
 def test_sina_builds_multi_and_single(adata, markers, group_key):
     multi = ag.plot_sina(adata, markers, group_key, use_raw=True, downsample=100)
     single = ag.plot_sina(adata, markers[:1], group_key, use_raw=True, violin=False)

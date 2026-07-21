@@ -11,15 +11,14 @@ tree only appears bolted onto a dotplot / matrixplot.
 from __future__ import annotations
 
 import pandas as pd
+import plotnine_extra as pe
 from plotnine import (
     aes,
-    element_text,
     geom_line,
     ggplot,
     labs,
     scale_x_continuous,
     scale_y_continuous,
-    theme,
 )
 
 from .theme import theme_ggann
@@ -32,8 +31,9 @@ def _dendrogram_info(adata, group_by: str, key: str | None):
     if key not in adata.uns:
         import scanpy as sc
 
-        # matches scanpy's own plotting behaviour: compute (and cache) if absent
-        sc.tl.dendrogram(adata, groupby=group_by)
+        # matches scanpy's own plotting behaviour: compute (and cache) if absent.
+        # key_added=key so a custom key is written where we then read it.
+        sc.tl.dendrogram(adata, groupby=group_by, key_added=key)
     return adata.uns[key]["dendrogram_info"]
 
 
@@ -68,7 +68,7 @@ def plot_dendrogram(adata, group_by: str, *, key: str | None = None, orientation
             + labs(x="", y="distance")
             + theme_ggann()
             # rotate the leaf labels so long category names stay legible
-            + theme(axis_text_x=element_text(angle=90, ha="right"))
+            + pe.rotate_x_text(90)
         )
     # 'left' -- swap axes so leaves run down the y axis
     return (
