@@ -77,7 +77,6 @@ The grammar entry point and the aesthetic-resolution escapes.
    rank_genes_df
    plot_rank_genes_dotplot
    plot_rank_genes_matrixplot
-   plot_rank_genes_heatmap
    plot_volcano
    plot_ma
 ```

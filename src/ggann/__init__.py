@@ -39,7 +39,6 @@ from .correlation import plot_correlation
 from .de import (
     plot_ma,
     plot_rank_genes_dotplot,
-    plot_rank_genes_heatmap,
     plot_rank_genes_matrixplot,
     plot_volcano,
     rank_genes_df,
@@ -114,7 +113,6 @@ __all__ = [
     "rank_genes_df",
     "plot_rank_genes_dotplot",
     "plot_rank_genes_matrixplot",
-    "plot_rank_genes_heatmap",
     "plot_volcano",
     "plot_ma",
     "plot_stacked_violin",
