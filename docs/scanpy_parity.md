@@ -74,5 +74,34 @@ ggann trades speed for the grammar-of-graphics: it is typically **~5–10× slow
 than scanpy** (plotnine builds a DataFrame + composes layers where scanpy draws
 matplotlib directly). It stays sub-second-to-a-few-seconds up to ~200k cells for
 most plots; the exception is the violin family, whose cost is plotnine's
-`geom_violin` KDE (≈45 s at 200k cells) — subsample cells per group before
-plotting large data.
+`geom_violin` KDE (≈45 s at 200k, ≈160 s at 1M cells).
+
+### Making plots blazing fast
+
+The dominant cost is per-cell: how many points/KDEs plotnine draws, not the size
+of the `AnnData`. So the biggest lever is **capping cells before the draw**. The
+slow plots take a `downsample=N` argument that keeps at most `N` cells per group
+(or `N` total, for embeddings) — a few thousand renders a visually identical
+distribution and collapses the violin family from ~45 s to ~4 s, roughly
+independent of the full dataset size:
+
+```python
+ag.plot_violin(adata, genes, "cell_type", downsample=2000)      # per group
+ag.plot_box(adata, genes, "cell_type", downsample=2000)
+ag.plot_stacked_violin(adata, genes, "cell_type", downsample=2000)
+ag.plot_embedding(adata, "umap", color="cell_type", downsample=50000)  # total
+ag.plot_features(adata, genes, downsample=50000)
+```
+
+Other levers, fastest-win first:
+
+- **Prefer `plot_ridge` over the violin family** for many groups — its per-group
+  `gaussian_kde` is far cheaper than plotnine's `geom_violin`.
+- **Fewer genes / fewer facets.** Cost scales with panels; dotplots and
+  matrixplots (which aggregate to group×gene) stay cheap because they don't draw
+  per cell.
+- **Rasterize dense scatter layers.** For a one-off huge embedding you can append
+  a rasterized point layer (`+ geom_point(..., raster=True)`) so the PNG stays
+  small; `downsample=` is usually simpler and enough.
+- **Save at a sane DPI.** `plot.save(..., dpi=100)` writes much faster than the
+  300 dpi default for exploratory figures.

@@ -51,6 +51,32 @@ def _is_numeric(series: pd.Series) -> bool:
     )
 
 
+def _downsample_cells(adata, group_by: str | None, n: int | None, *, seed: int = 0):
+    """Cap the number of cells (optionally per ``group_by`` category) for speed.
+
+    plotnine's per-cell geoms (violins especially) scale poorly with cell count; a
+    few thousand cells per group render an identical-looking distribution far
+    faster. Returns ``adata`` unchanged when ``n`` is None or already small enough.
+    """
+    import numpy as np
+
+    if not n or adata.n_obs <= n:
+        return adata
+    rng = np.random.RandomState(seed)
+    if group_by is None:
+        keep = rng.choice(adata.n_obs, n, replace=False)
+    else:
+        col = adata.obs[group_by]
+        cats = list(col.cat.categories) if hasattr(col, "cat") else list(pd.unique(col))
+        arr = col.to_numpy()
+        parts = []
+        for cat in cats:
+            idx = np.flatnonzero(arr == cat)
+            parts.append(idx if len(idx) <= n else rng.choice(idx, n, replace=False))
+        keep = np.concatenate(parts) if parts else np.arange(adata.n_obs)
+    return adata[np.sort(keep)].copy()
+
+
 def _feature_facet(split_by: str | None, *, ncol: int = 1, scales: str = "free_y"):
     """Facet by feature, adding a ``split_by`` column dimension when given.
 
@@ -99,6 +125,7 @@ def plot_embedding(
     label_size: float = 9,
     low: str = "#d9d9d9",
     high: str = "#2166ac",
+    downsample: int | None = None,
 ):
     """Scatter over an embedding (UMAP/t-SNE/PCA), optionally coloured and split.
 
@@ -111,7 +138,10 @@ def plot_embedding(
     * ``label=True`` -> for a categorical ``color``, print each category at its
       centroid using repelled (non-overlapping) text, like scplotter's
       ``CellDimPlot`` / Seurat ``label=TRUE``.
+    * ``downsample=N`` -> randomly keep at most ``N`` cells before drawing, for a
+      much lighter scatter on large data (density reads the same; exact points differ).
     """
+    adata = _downsample_cells(adata, None, downsample)
     coords = embedding_coords(adata, basis)
     if coords.shape[1] < 2:
         raise ValueError(
@@ -211,6 +241,7 @@ def plot_features(
     size: float = 1.2,
     alpha: float = 0.9,
     cmap: str = "magma",
+    downsample: int | None = None,
 ):
     """Multi-gene embedding grid: one faceted panel per feature.
 
@@ -218,8 +249,10 @@ def plot_features(
     magnitudes *across* genes. Because the scale is shared, a low-range gene shown
     next to a high-range one will look faint -- for independent per-gene colour
     bars (like ``sc.pl.umap(color=[...])``), compose separate ``plot_embedding``
-    calls with the re-exported ``Wrap`` / ``plot_layout`` instead.
+    calls with the re-exported ``Wrap`` / ``plot_layout`` instead. ``downsample=N``
+    caps cells before drawing for lighter panels on large data.
     """
+    adata = _downsample_cells(adata, None, downsample)
     coords = embedding_coords(adata, basis)
     if coords.shape[1] < 2:
         raise ValueError(f"Embedding '{basis}' has fewer than 2 dimensions.")
@@ -390,6 +423,7 @@ def plot_violin(
     add_box: bool = True,
     add_points: bool = False,
     stats: bool = False,
+    downsample: int | None = None,
     categories_order: Iterable[str] | None = None,
 ):
     """Per-group expression distributions, one facet per gene (stacked-violin style).
@@ -399,8 +433,14 @@ def plot_violin(
     does. ``add_points=True`` overlays the individual cells as jitter (scplotter's
     ``add_point``). ``split_by`` adds a facet column (gene rows x split columns).
     Set ``stats=True`` to overlay a group-comparison test via plotnine-extra's
-    ``stat_compare_means``.
+    ``stat_compare_means``. ``downsample`` caps cells per group before the (slow)
+    violin KDE -- a big speed-up on large data for a visually identical plot.
+
+    Note: ``downsample`` subsets the cells the geoms see, so any ``stats=True``
+    p-value is then computed on the *subsample*, not the full data. Leave
+    ``downsample`` unset when you need the reported test to reflect every cell.
     """
+    adata = _downsample_cells(adata, group_by, downsample)
     genes = list(genes)
     extra = [split_by] if split_by else []
     tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw, extra_obs=extra)
