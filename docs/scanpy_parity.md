@@ -53,21 +53,29 @@ scanpy's are matplotlib.
 | `sc.pl.rank_genes_groups_dotplot/matrixplot` | `plot_rank_genes_dotplot/matrixplot` | ✅ |
 | `sc.pl.clustermap` | `plot_clustermap` | ✅ |
 | `sc.pl.scatter` (obs metrics) | `plot_qc_scatter` | ✅ |
+| `sc.pl.heatmap` | `plot_heatmap` (per-cell tiles) | ✅ |
+| `sc.pl.pca_variance_ratio` | `plot_variance_ratio` | ✅ |
+| `sc.pl.embedding_density` | `plot_embedding_density` (native KDE) | ✅ |
+| `sc.pl.dendrogram` | `plot_dendrogram` | ✅ |
 
-## Missing plots (the backlog these comparisons surface)
+Beyond scanpy, ggann also ships a **sina / beeswarm** distribution
+(`plot_sina`, via plotnine-extra's `stat_sina`) and an **MA plot**
+(`plot_ma`) for pseudobulk differential expression.
+
+## Still out of scope
 
 | scanpy | what it is | ggann |
 |---|---|---|
-| **`sc.pl.heatmap`** | per-**cell** expression heatmap (cells x genes, grouped) | ❌ ggann has only aggregated heatmaps (`plot_matrixplot`, `plot_clustermap`) |
-| **`sc.pl.pca_variance_ratio`** | scree / elbow plot for choosing PCs | ❌ (trivial to add: `plot_variance_ratio`) |
-| **`sc.pl.embedding_density`** | per-group **cell** density on an embedding | ❌ (`plot_density` is *gene-weighted* KDE — different) |
-| **`sc.pl.dendrogram`** | standalone hierarchical tree of groups | ❌ (clustering only happens inside `plot_clustermap`) |
 | `sc.pl.scatter` (gene vs gene) | two genes' expression scattered | 🟡 via `gganndata(aes(gene(a), gene(b)))` — no dedicated helper |
 | `sc.pl.paga` / `draw_graph` trajectories | graph-abstraction / trajectory | ❌ out of scope (scanpy/scFates) |
 
-Beyond scanpy, common single-cell plots also worth adding: a **sina / beeswarm**
-distribution (plotnine-extra ships `stat_sina`), and an **MA plot** for
-pseudobulk differential expression.
+A note on the two closest matches:
+
+* **`plot_embedding_density`** computes a per-group 2D Gaussian KDE directly
+  rather than reading a pre-computed `sc.tl.embedding_density` result, so it is a
+  ggann-native alternative rather than a byte-for-byte reproduction.
+* **`plot_heatmap`** draws one tile column per cell (blocked by group); pass
+  `downsample=N` to cap cells per group on large data.
 
 ## A note on performance
 ggann trades speed for the grammar-of-graphics: it is typically **~5–10× slower

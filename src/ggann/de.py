@@ -10,7 +10,15 @@ plotnine-extra's ``ggvolcano``.
 from __future__ import annotations
 
 import plotnine_extra as pe
-from plotnine import labs, scale_color_manual
+from plotnine import (
+    aes,
+    geom_hline,
+    geom_point,
+    ggplot,
+    labs,
+    scale_color_manual,
+    scale_x_log10,
+)
 
 from .plots import plot_dotplot, plot_matrixplot
 from .theme import theme_ggann
@@ -26,7 +34,11 @@ __all__ = [
     "plot_rank_genes_matrixplot",
     "plot_rank_genes_heatmap",
     "plot_volcano",
+    "plot_ma",
 ]
+
+# MA-plot significance colours: significant = red, the rest grey.
+_MA_COLORS = {True: "#B40426", False: "#B8B8B8"}
 
 
 def _require_de(adata, key: str):
@@ -118,3 +130,59 @@ def plot_volcano(
         + labs(x="log2 fold change", y="-log10(adjusted p-value)")
         + theme_ggann()
     )
+
+
+def plot_ma(
+    data,
+    *,
+    mean: str = "baseMean",
+    lfc: str = "log2FoldChange",
+    pval: str = "padj",
+    padj: float = 0.05,
+    label: str | None = None,
+    label_top: int = 0,
+    size: float = 1.2,
+):
+    """MA plot of a (pseudobulk) differential-expression table.
+
+    Plots mean expression on the x axis (log-scaled, the "A" of MA) against the
+    log2 fold change on the y axis (the "M"), the standard diagnostic for a
+    pseudobulk DE run (PyDESeq2 / decoupler / edgeR-style results). Genes with
+    ``pval < padj`` are highlighted; the default column names follow PyDESeq2
+    (``baseMean`` / ``log2FoldChange`` / ``padj``) but any table works via the
+    ``mean`` / ``lfc`` / ``pval`` arguments.
+
+    ``data`` is a :class:`pandas.DataFrame` (gene name in the index or a column
+    named by ``label``). Set ``label_top=N`` to annotate the ``N`` genes with the
+    largest absolute fold change among the significant ones.
+    """
+    missing = [c for c in (mean, lfc, pval) if c not in data.columns]
+    if missing:
+        raise KeyError(f"plot_ma: columns {missing} not in the results table.")
+
+    df = data.copy()
+    df["significant"] = (df[pval] < padj) & df[pval].notna()
+    # drop rows with no mean expression -- they can't sit on a log x axis
+    df = df[df[mean] > 0]
+
+    plot = (
+        ggplot(df, aes(mean, lfc, color="significant"))
+        + geom_point(size=size, alpha=0.6, stroke=0)
+        + geom_hline(yintercept=0, linetype="dashed", color="#4d4d4d")
+        + scale_x_log10()
+        + scale_color_manual(values=_MA_COLORS, labels={True: "sig.", False: "n.s."})
+        + labs(x="mean expression", y="log2 fold change", color=f"padj < {padj}")
+        + theme_ggann()
+    )
+    if label_top:
+        sig = df[df["significant"]].copy()
+        sig["_abs"] = sig[lfc].abs()
+        top = sig.sort_values("_abs", ascending=False).head(label_top)
+        if label is not None:
+            top = top.assign(_lab=top[label])
+        else:
+            top = top.assign(_lab=top.index.astype(str))
+        plot = plot + pe.geom_text_repel(
+            aes(mean, lfc, label="_lab"), data=top, size=8, color="black", inherit_aes=False
+        )
+    return plot

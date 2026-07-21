@@ -1,0 +1,80 @@
+"""Standalone hierarchical dendrogram of groups (``sc.pl.dendrogram``).
+
+scanpy stores a dendrogram under ``adata.uns['dendrogram_<groupby>']`` (computed
+by ``sc.tl.dendrogram``), including the scipy plotting coordinates
+(``icoord`` / ``dcoord``) and the leaf order (``ivl``). This module renders those
+coordinates as an ordinary :class:`plotnine.ggplot` tree, so the dendrogram
+composes with ggann's theme and can stand on its own -- unlike scanpy, where the
+tree only appears bolted onto a dotplot / matrixplot.
+"""
+
+from __future__ import annotations
+
+import pandas as pd
+from plotnine import (
+    aes,
+    element_text,
+    geom_line,
+    ggplot,
+    labs,
+    scale_x_continuous,
+    scale_y_continuous,
+    theme,
+)
+
+from .theme import theme_ggann
+
+__all__ = ["plot_dendrogram"]
+
+
+def _dendrogram_info(adata, group_by: str, key: str | None):
+    key = key or f"dendrogram_{group_by}"
+    if key not in adata.uns:
+        import scanpy as sc
+
+        # matches scanpy's own plotting behaviour: compute (and cache) if absent
+        sc.tl.dendrogram(adata, groupby=group_by)
+    return adata.uns[key]["dendrogram_info"]
+
+
+def plot_dendrogram(adata, group_by: str, *, key: str | None = None, orientation: str = "top"):
+    """Hierarchical tree relating the categories of ``group_by`` (``sc.pl.dendrogram``).
+
+    Reuses the coordinates stored by ``sc.tl.dendrogram`` in
+    ``adata.uns['dendrogram_<group_by>']`` (computing them if absent, as scanpy
+    does). ``orientation='top'`` draws leaves along the x axis with linkage height
+    on y; ``orientation='left'`` rotates the tree so leaves run down the y axis.
+    """
+    if orientation not in {"top", "left"}:
+        raise ValueError("orientation must be 'top' or 'left'.")
+    info = _dendrogram_info(adata, group_by, key)
+    icoord, dcoord, ivl = info["icoord"], info["dcoord"], info["ivl"]
+
+    # each link is a "|‾‾|" of 4 points; keep them as one grouped path
+    rows = []
+    for link, (xs, ys) in enumerate(zip(icoord, dcoord)):
+        for x, y in zip(xs, ys):
+            rows.append({"link": link, "pos": x, "height": y})
+    seg = pd.DataFrame(rows)
+
+    # scipy places the i-th leaf at x = 10*i + 5
+    leaf_pos = [10 * i + 5 for i in range(len(ivl))]
+
+    if orientation == "top":
+        return (
+            ggplot(seg, aes("pos", "height", group="link"))
+            + geom_line()
+            + scale_x_continuous(breaks=leaf_pos, labels=list(ivl))
+            + labs(x="", y="distance")
+            + theme_ggann()
+            # rotate the leaf labels so long category names stay legible
+            + theme(axis_text_x=element_text(angle=90, ha="right"))
+        )
+    # 'left' -- swap axes so leaves run down the y axis
+    return (
+        ggplot(seg, aes("height", "pos", group="link"))
+        + geom_line()
+        + scale_y_continuous(breaks=leaf_pos, labels=list(ivl))
+        + labs(x="distance", y="")
+        + theme_ggann()
+    )

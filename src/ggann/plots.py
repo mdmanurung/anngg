@@ -16,6 +16,8 @@ import plotnine_extra as pe
 from plotnine import (
     aes,
     element_blank,
+    element_text,
+    facet_grid,
     geom_boxplot,
     geom_jitter,
     geom_point,
@@ -42,6 +44,8 @@ __all__ = [
     "plot_dotplot",
     "plot_matrixplot",
     "plot_violin",
+    "plot_embedding_density",
+    "plot_heatmap",
 ]
 
 
@@ -464,3 +468,124 @@ def plot_violin(
     if stats:
         plot = plot + pe.stat_compare_means()
     return plot
+
+
+def plot_embedding_density(
+    adata,
+    basis: str = "umap",
+    group_by: str | None = None,
+    *,
+    size: float = 2.0,
+    ncol: int | None = None,
+    cmap: str = "viridis",
+    downsample: int | None = None,
+):
+    """Per-group cell density over an embedding (a ggann-native take on
+    ``sc.pl.embedding_density``).
+
+    For each ``group_by`` category a 2D Gaussian KDE is fit on that group's
+    embedding coordinates and evaluated at its cells, so every panel shows *where
+    that group's cells concentrate* on the shared embedding, min-max scaled to
+    ``[0, 1]``. With ``group_by=None`` a single density over all cells is drawn.
+
+    This computes the density directly (via ``scipy.stats.gaussian_kde``) rather
+    than reading a pre-computed ``sc.tl.embedding_density`` result, so it is a
+    native alternative rather than a byte-for-byte reproduction of scanpy's output.
+    """
+    from scipy.stats import gaussian_kde
+
+    adata = _downsample_cells(adata, group_by, downsample)
+    coords = embedding_coords(adata, basis)
+    if coords.shape[1] < 2:
+        raise ValueError(f"Embedding '{basis}' has fewer than 2 dimensions.")
+    xcol, ycol = coords.columns[:2]
+
+    def _density(sub: pd.DataFrame) -> pd.Series:
+        xy = sub[[xcol, ycol]].to_numpy().T
+        # KDE needs >2 points and some spread; degenerate groups get a flat density
+        if xy.shape[1] < 3 or float(pd.DataFrame(xy.T).std().min()) == 0.0:
+            return pd.Series(0.0, index=sub.index)
+        try:
+            d = gaussian_kde(xy)(xy)
+        except Exception:  # singular covariance etc. -- fall back to flat
+            return pd.Series(0.0, index=sub.index)
+        lo, hi = float(d.min()), float(d.max())
+        d = (d - lo) / (hi - lo) if hi > lo else d * 0.0
+        return pd.Series(d, index=sub.index)
+
+    if group_by is None:
+        df = coords.copy()
+        df["density"] = _density(df).to_numpy()
+        plot = ggplot(df, aes(xcol, ycol, color="density")) + geom_point(size=size)
+    else:
+        gcol = resolve_frame(adata, [group_by])[[group_by]]
+        df = coords.join(gcol)
+        df["density"] = (
+            df.groupby(group_by, observed=True, group_keys=False).apply(_density).to_numpy()
+        )
+        cats = _group_categories(adata, group_by)
+        df = _order_groups(df, group_by, cats)
+        plot = (
+            ggplot(df, aes(xcol, ycol, color="density"))
+            + geom_point(size=size)
+            + pe.facet_wrap("~" + group_by, ncol=ncol)
+        )
+    return plot + scale_color_cmap(cmap_name=cmap) + theme_ggann() + _embedding_axes()
+
+
+def plot_heatmap(
+    adata,
+    genes: Sequence[str],
+    group_by: str,
+    *,
+    layer: str | None = None,
+    use_raw: bool | None = None,
+    cmap: str = "viridis",
+    standard_scale: str | None = None,
+    categories_order: Sequence[str] | None = None,
+    downsample: int | None = None,
+):
+    """Per-**cell** expression heatmap, cells grouped along x (``sc.pl.heatmap``).
+
+    One column per cell (blocked and labelled by ``group_by``), one row per gene,
+    tile-coloured by expression -- the per-cell counterpart to the aggregated
+    :func:`plot_matrixplot`. ``standard_scale='var'`` z-min-max-scales each gene to
+    ``[0, 1]`` across cells so low- and high-range genes stay comparable.
+    ``downsample=N`` caps cells per group first (recommended for large data).
+    """
+    adata = _downsample_cells(adata, group_by, downsample)
+    genes = list(genes)
+    tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw)
+    if categories_order is None:
+        categories_order = _group_categories(adata, group_by)
+    tidy = _order_groups(tidy, group_by, categories_order)
+
+    if standard_scale == "var":
+        g = tidy.groupby("feature", observed=True)["value"]
+        lo = g.transform("min")
+        rng = g.transform("max") - lo
+        tidy["value"] = ((tidy["value"] - lo) / rng.replace(0, pd.NA)).fillna(0.0)
+        fill_lab = "scaled expr."
+    else:
+        fill_lab = "expression"
+
+    # order cells by group, then give each a rank so tiles sit side by side
+    cell = tidy[["obs_name", group_by]].drop_duplicates().sort_values(group_by)
+    cell = cell.reset_index(drop=True)
+    cell["cell_rank"] = range(len(cell))
+    tidy = tidy.merge(cell[["obs_name", "cell_rank"]], on="obs_name")
+    tidy["feature"] = pd.Categorical(tidy["feature"], categories=list(reversed(genes)), ordered=True)
+
+    return (
+        ggplot(tidy, aes("cell_rank", "feature", fill="value"))
+        + geom_tile()
+        + facet_grid(". ~ " + group_by, scales="free_x", space="free_x")
+        + scale_fill_cmap(cmap_name=cmap)
+        + labs(x="", y="", fill=fill_lab)
+        + theme_ggann()
+        + theme(
+            axis_text_x=element_blank(),
+            axis_ticks_major_x=element_blank(),
+            strip_text_x=element_text(angle=90),
+        )
+    )
