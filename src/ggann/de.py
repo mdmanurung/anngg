@@ -32,7 +32,6 @@ __all__ = [
     "rank_genes_df",
     "plot_rank_genes_dotplot",
     "plot_rank_genes_matrixplot",
-    "plot_rank_genes_heatmap",
     "plot_volcano",
     "plot_ma",
 ]
@@ -96,10 +95,6 @@ def plot_rank_genes_matrixplot(
     groupby = _de_groupby(adata, key, groupby)
     genes = _top_genes(adata, n_genes, key)
     return plot_matrixplot(adata, genes, groupby, standard_scale=standard_scale, **kwargs)
-
-
-# Back-compat alias (this renders group-mean tiles, i.e. matrixplot semantics).
-plot_rank_genes_heatmap = plot_rank_genes_matrixplot
 
 
 def plot_volcano(

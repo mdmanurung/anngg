@@ -39,20 +39,26 @@ from .correlation import plot_correlation
 from .de import (
     plot_ma,
     plot_rank_genes_dotplot,
-    plot_rank_genes_heatmap,
     plot_rank_genes_matrixplot,
     plot_volcano,
     rank_genes_df,
 )
 from .dendrogram import plot_dendrogram
 from .density import plot_density
-from .distributions import plot_box, plot_expression_bar, plot_expression_line, plot_sina
+from .distributions import (
+    plot_box,
+    plot_expression_bar,
+    plot_expression_line,
+    plot_ridge,
+    plot_sina,
+    plot_stacked_violin,
+    plot_violin,
+)
 from .grammar import aes, gganndata
 from .layout import compose, tag_panels
 from .markers import (
     plot_dotplot_grouped,
     plot_matrixplot_grouped,
-    plot_stacked_violin,
     plot_tracksplot,
 )
 from .plots import (
@@ -62,7 +68,6 @@ from .plots import (
     plot_features,
     plot_heatmap,
     plot_matrixplot,
-    plot_violin,
 )
 from .pseudobulk import pseudobulk
 from .qc import (
@@ -71,7 +76,6 @@ from .qc import (
     plot_qc_violin,
     plot_variance_ratio,
 )
-from .ridge import plot_ridge
 from .upset import plot_upset
 from .theme import (
     reset_theme,
@@ -114,7 +118,6 @@ __all__ = [
     "rank_genes_df",
     "plot_rank_genes_dotplot",
     "plot_rank_genes_matrixplot",
-    "plot_rank_genes_heatmap",
     "plot_volcano",
     "plot_ma",
     "plot_stacked_violin",

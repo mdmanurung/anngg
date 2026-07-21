@@ -60,7 +60,7 @@ def test_de_requires_ranking(adata):
 
 def test_de_dotplot_and_volcano_render(de_adata, tmp_path):
     _renders(ag.plot_rank_genes_dotplot(de_adata, n_genes=3), tmp_path, "de_dot")
-    _renders(ag.plot_rank_genes_heatmap(de_adata, n_genes=3), tmp_path, "de_heat")
+    _renders(ag.plot_rank_genes_matrixplot(de_adata, n_genes=3), tmp_path, "de_mat")
     _renders(ag.plot_volcano(de_adata, group="CD56+ NK"), tmp_path, "volcano")
 
 
@@ -165,6 +165,5 @@ def test_gene_in_two_groups_raises(adata, group_key):
         ag.plot_dotplot_grouped(adata, {"A": ["CD3D"], "B": ["CD3D"]}, group_key)
 
 
-def test_rank_genes_matrixplot_alias(de_adata):
-    assert ag.plot_rank_genes_heatmap is ag.plot_rank_genes_matrixplot
+def test_rank_genes_matrixplot(de_adata):
     _ = ag.plot_rank_genes_matrixplot(de_adata, n_genes=2)

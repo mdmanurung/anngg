@@ -18,8 +18,8 @@ apiex = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(apiex)
 
 
-# plotnine-extra layout modifiers (not standalone figures) + the matrixplot alias
-_NON_FIGURE = {"plot_annotation", "plot_layout", "plot_rank_genes_heatmap"}
+# plotnine-extra layout modifiers (not standalone figures)
+_NON_FIGURE = {"plot_annotation", "plot_layout"}
 
 
 @pytest.fixture(scope="module")
