@@ -18,11 +18,8 @@ from plotnine import (
     element_blank,
     element_text,
     facet_grid,
-    geom_boxplot,
-    geom_jitter,
     geom_point,
     geom_tile,
-    geom_violin,
     ggplot,
     guide_legend,
     guides,
@@ -34,7 +31,7 @@ from plotnine import (
 )
 
 from ._aggregate import aggregate_expression, tidy_expression
-from ._palette import scale_color_obs, scale_fill_obs
+from ._palette import scale_color_obs
 from ._resolve import embedding_coords, plain_name, resolve_frame
 from .theme import theme_ggann
 
@@ -43,7 +40,6 @@ __all__ = [
     "plot_features",
     "plot_dotplot",
     "plot_matrixplot",
-    "plot_violin",
     "plot_embedding_density",
     "plot_heatmap",
 ]
@@ -429,62 +425,6 @@ def plot_matrixplot(
         + pe.rotate_x_text(45)
     )
     return plot + pe.facet_wrap(f"~{split_by}") if split_by else plot
-
-
-def plot_violin(
-    adata,
-    genes: Sequence[str],
-    group_by: str,
-    *,
-    split_by: str | None = None,
-    layer: str | None = None,
-    use_raw: bool | None = None,
-    ncol: int = 1,
-    scale: str = "width",
-    add_box: bool = True,
-    add_points: bool = False,
-    stats: bool = False,
-    downsample: int | None = None,
-    categories_order: Iterable[str] | None = None,
-):
-    """Per-group expression distributions, one facet per gene (stacked-violin style).
-
-    ``add_box=True`` (default) nests a slim white boxplot inside each violin so the
-    median and quartiles read off cleanly, the way scplotter's ``FeatureStatPlot``
-    does. ``add_points=True`` overlays the individual cells as jitter (scplotter's
-    ``add_point``). ``split_by`` adds a facet column (gene rows x split columns).
-    Set ``stats=True`` to overlay a group-comparison test via plotnine-extra's
-    ``stat_compare_means``. ``downsample`` caps cells per group before the (slow)
-    violin KDE -- a big speed-up on large data for a visually identical plot.
-
-    Note: ``downsample`` subsets the cells the geoms see, so any ``stats=True``
-    p-value is then computed on the *subsample*, not the full data. Leave
-    ``downsample`` unset when you need the reported test to reflect every cell.
-    """
-    adata = _downsample_cells(adata, group_by, downsample)
-    genes = list(genes)
-    extra = [split_by] if split_by else []
-    tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw, extra_obs=extra)
-    if categories_order is None:
-        categories_order = _group_categories(adata, group_by)
-    tidy = _order_groups(tidy, group_by, categories_order)
-    plot = ggplot(tidy, aes(group_by, "value", fill=group_by)) + geom_violin(scale=scale)
-    # box first, then points on top -- otherwise the white box occludes the jitter
-    if add_box:
-        plot = plot + geom_boxplot(width=0.12, fill="white", outlier_alpha=0.0, show_legend=False)
-    if add_points:
-        plot = plot + geom_jitter(width=0.2, height=0.0, size=0.3, alpha=0.25, stroke=0)
-    plot = (
-        plot
-        + _feature_facet(split_by, ncol=ncol)
-        + scale_fill_obs(adata, group_by)
-        + labs(x="", y="expression", fill=group_by)
-        + theme_ggann()
-        + pe.rotate_x_text(45)
-    )
-    if stats:
-        plot = plot + pe.stat_compare_means()
-    return plot
 
 
 def plot_embedding_density(

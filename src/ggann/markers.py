@@ -1,8 +1,9 @@
-"""Additional marker-summary plots: stacked violin and tracksplot.
+"""Marker-summary plots: tracksplot and the gene-group-bracketed dot/matrix plots.
 
-Both stack genes as rows (``facet_grid`` over the feature) so many markers can be
-compared across groups compactly, mirroring ``sc.pl.stacked_violin`` /
-``sc.pl.tracksplot``. Expression is pulled long through annplyr's ``to_tidy``.
+``plot_tracksplot`` stacks genes as rows (``facet_grid`` over the feature),
+mirroring ``sc.pl.tracksplot``; the ``*_grouped`` helpers bracket the gene axis
+into labelled groups (scanpy ``var_group_labels``). Expression is pulled long
+through annplyr's ``to_tidy``. (The violin family lives in ``distributions``.)
 """
 
 from __future__ import annotations
@@ -10,14 +11,12 @@ from __future__ import annotations
 from typing import Sequence
 
 import pandas as pd
-import plotnine_extra as pe
 from plotnine import (
     aes,
     element_blank,
     element_text,
     facet_grid,
     geom_col,
-    geom_violin,
     ggplot,
     labs,
     theme,
@@ -27,7 +26,6 @@ from ._aggregate import tidy_expression
 from ._palette import scale_fill_obs
 from .plots import (
     _cell_rank,
-    _downsample_cells,
     _group_categories,
     _order_groups,
     plot_dotplot,
@@ -36,7 +34,6 @@ from .plots import (
 from .theme import theme_ggann
 
 __all__ = [
-    "plot_stacked_violin",
     "plot_tracksplot",
     "plot_dotplot_grouped",
     "plot_matrixplot_grouped",
@@ -86,38 +83,6 @@ def plot_matrixplot_grouped(adata, gene_groups: dict, group_by: str, **kwargs):
     """Matrixplot with genes bracketed into labelled groups (scanpy ``var_group_labels``)."""
     genes, _ = _flatten_gene_groups(gene_groups)
     return _add_gene_group_facet(plot_matrixplot(adata, genes, group_by, **kwargs), gene_groups)
-
-
-def plot_stacked_violin(
-    adata,
-    genes: Sequence[str],
-    group_by: str,
-    *,
-    layer: str | None = None,
-    use_raw: bool | None = None,
-    scale: str = "width",
-    categories_order=None,
-    downsample: int | None = None,
-):
-    """Compact genes-as-rows violin grid across groups (``sc.pl.stacked_violin``).
-
-    Pass ``downsample=N`` to cap cells per group before the KDE for large data —
-    the violin family is plotnine's slowest geom; see :func:`ggann.plot_violin`.
-    """
-    adata = _downsample_cells(adata, group_by, downsample)
-    genes = list(genes)
-    tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw)
-    tidy = _order_groups(tidy, group_by, categories_order or _group_categories(adata, group_by))
-    return (
-        ggplot(tidy, aes(group_by, "value", fill=group_by))
-        + geom_violin(scale=scale)
-        + facet_grid("feature ~ .", scales="free_y")
-        + scale_fill_obs(adata, group_by)
-        + labs(x="", y="", fill=group_by)
-        + theme_ggann()
-        + theme(strip_text_y=element_text(angle=0))
-        + pe.rotate_x_text(45)
-    )
 
 
 def plot_tracksplot(
