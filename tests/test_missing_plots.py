@@ -34,6 +34,38 @@ def test_embedding_density_grouped_and_pooled(adata, group_key):
         plot._build()
 
 
+def test_embedding_density_assigns_each_cell_its_own_density(group_key):
+    """Each cell's density must come from its OWN group, in cell order. A
+    degenerate 2-cell group B has density exactly 0 (KDE needs >2 points); if the
+    grouped result is assigned positionally instead of by index, those zeros land
+    on the wrong (interleaved) rows and the B cells pick up nonzero A densities."""
+    import anndata as ad_mod
+    import numpy as np
+    import pandas as pd
+
+    rng = np.random.RandomState(0)
+    n = 42
+    groups = np.array(["A"] * n, dtype=object)
+    groups[1] = groups[3] = "B"  # two B cells, interleaved among the A cells
+    coords = rng.normal(0, 0.05, (n, 2))  # tight A blob
+    coords[[1, 3]] = [[10.0, 10.0], [10.1, 9.9]]  # B lives far away
+    coords[20] = [5.0, 5.0]  # an A outlier, for the secondary check
+    adata = ad_mod.AnnData(
+        X=rng.normal(size=(n, 3)),
+        obs=pd.DataFrame({group_key: pd.Categorical(groups)}, index=[f"c{i}" for i in range(n)]),
+    )
+    adata.obsm["X_umap"] = coords
+    d = ag.plot_embedding_density(adata, "umap", group_key).data
+
+    # the degenerate B group must be exactly 0 everywhere (the sharp discriminator)
+    assert (d.loc[d[group_key] == "B", "density"] == 0).all()
+    # and within A, the far outlier is less dense than the blob median
+    a = d[d[group_key] == "A"]
+    xcol = next(c for c in d.columns if str(c).startswith("UMAP"))
+    outlier = a.loc[a[xcol].idxmax()]
+    assert outlier["density"] < a.drop(index=outlier.name)["density"].median()
+
+
 def test_heatmap_builds_and_scales(adata, markers, group_key):
     plain = ag.plot_heatmap(adata, markers, group_key, use_raw=True)
     scaled = ag.plot_heatmap(adata, markers, group_key, use_raw=True, standard_scale="var")

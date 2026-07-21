@@ -520,9 +520,10 @@ def plot_embedding_density(
     else:
         gcol = resolve_frame(adata, [group_by])[[group_by]]
         df = coords.join(gcol)
-        df["density"] = (
-            df.groupby(group_by, observed=True, group_keys=False).apply(_density).to_numpy()
-        )
+        # groupby(...).apply concatenates in group-sorted order, so reindex back
+        # to df's cell order (a bare .to_numpy() would misalign interleaved groups)
+        per_group = df.groupby(group_by, observed=True, group_keys=False).apply(_density)
+        df["density"] = per_group.reindex(df.index).to_numpy()
         cats = _group_categories(adata, group_by)
         df = _order_groups(df, group_by, cats)
         plot = (
