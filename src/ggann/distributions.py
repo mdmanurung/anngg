@@ -23,6 +23,7 @@ from plotnine import (
     geom_jitter,
     geom_line,
     geom_point,
+    geom_violin,
     ggplot,
     labs,
 )
@@ -39,7 +40,7 @@ from .plots import (
 )
 from .theme import theme_ggann
 
-__all__ = ["plot_box", "plot_expression_bar", "plot_expression_line"]
+__all__ = ["plot_box", "plot_sina", "plot_expression_bar", "plot_expression_line"]
 
 
 def _summarise(values: pd.core.groupby.SeriesGroupBy, error: str, agg="mean") -> pd.DataFrame:
@@ -113,6 +114,63 @@ def plot_box(
     )
     if stats:
         plot = plot + pe.stat_compare_means()
+    return plot
+
+
+def plot_sina(
+    adata,
+    genes: Sequence[str],
+    group_by: str,
+    *,
+    split_by: str | None = None,
+    layer: str | None = None,
+    use_raw: bool | None = None,
+    ncol: int = 1,
+    size: float = 0.4,
+    alpha: float = 0.5,
+    violin: bool = True,
+    bins: int = 50,
+    categories_order: Sequence[str] | None = None,
+    downsample: int | None = None,
+):
+    """Sina / beeswarm of per-group expression, one facet per gene.
+
+    A sina plot spreads each group's cells horizontally in proportion to the local
+    density (via plotnine-extra's ``geom_sina``), so it shows every cell like a
+    jitter but keeps the shape of a violin. ``violin=True`` draws a faint violin
+    behind the points for context. ``downsample=N`` caps cells per group first --
+    recommended for large data, since a sina draws one mark per cell.
+    """
+    genes = list(genes)
+    adata = _downsample_cells(adata, group_by, downsample)
+    extra = [split_by] if split_by else []
+    tidy = tidy_expression(adata, genes, group_by, layer=layer, use_raw=use_raw, extra_obs=extra)
+    if categories_order is None:
+        categories_order = _group_categories(adata, group_by)
+    tidy = _order_groups(tidy, group_by, categories_order)
+
+    # Drive stat_sina by binwidth rather than bins: plotnine 0.15's stat_sina
+    # mutates its shared ``bins`` param across panels (the second facet then gets
+    # an array where a scalar is expected and crashes). The binwidth branch reads
+    # an untouched param each panel, so it is multi-facet safe.
+    span = float(tidy["value"].max() - tidy["value"].min())
+    binwidth = span / bins if span > 0 else 1.0
+
+    plot = ggplot(tidy, aes(group_by, "value", color=group_by))
+    if violin:
+        plot = plot + geom_violin(
+            aes(fill=group_by), color="none", alpha=0.15, scale="width", show_legend=False
+        )
+    plot = (
+        plot
+        + pe.geom_sina(size=size, alpha=alpha, stroke=0, binwidth=binwidth)
+        + _feature_facet(split_by, ncol=ncol)
+        + scale_color_obs(adata, group_by)
+        + scale_fill_obs(adata, group_by)
+        + labs(x="", y="expression", color=group_by)
+        + theme_ggann()
+        + pe.rotate_x_text(45)
+    )
     return plot
 
 

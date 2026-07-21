@@ -31,6 +31,7 @@ The grammar entry point and the aesthetic-resolution escapes.
    plot_embedding
    plot_features
    plot_density
+   plot_embedding_density
 ```
 
 ## Markers & expression summaries
@@ -44,11 +45,13 @@ The grammar entry point and the aesthetic-resolution escapes.
    plot_dotplot_grouped
    plot_matrixplot
    plot_matrixplot_grouped
+   plot_heatmap
    plot_violin
    plot_ridge
    plot_stacked_violin
    plot_tracksplot
    plot_clustermap
+   plot_dendrogram
 ```
 
 ## Distributions
@@ -59,6 +62,7 @@ The grammar entry point and the aesthetic-resolution escapes.
    :nosignatures:
 
    plot_box
+   plot_sina
    plot_expression_bar
    plot_expression_line
 ```
@@ -75,6 +79,7 @@ The grammar entry point and the aesthetic-resolution escapes.
    plot_rank_genes_matrixplot
    plot_rank_genes_heatmap
    plot_volcano
+   plot_ma
 ```
 
 ## Composition, correlation & sets
@@ -118,6 +123,7 @@ The grammar entry point and the aesthetic-resolution escapes.
    plot_qc_violin
    plot_qc_scatter
    plot_highest_expr_genes
+   plot_variance_ratio
 ```
 
 ## Scales, theme & layout

@@ -17,9 +17,12 @@ from plotnine import (
     aes,
     element_blank,
     geom_boxplot,
+    geom_line,
+    geom_point,
     geom_violin,
     ggplot,
     labs,
+    scale_y_log10,
     theme,
 )
 
@@ -28,7 +31,12 @@ from ._palette import scale_fill_obs
 from ._resolve import _densify, _raw_wide
 from .theme import theme_ggann
 
-__all__ = ["plot_qc_violin", "plot_qc_scatter", "plot_highest_expr_genes"]
+__all__ = [
+    "plot_qc_violin",
+    "plot_qc_scatter",
+    "plot_highest_expr_genes",
+    "plot_variance_ratio",
+]
 
 # Common QC metric names across scanpy / older workflows.
 _DEFAULT_METRICS = [
@@ -169,3 +177,31 @@ def plot_highest_expr_genes(adata, n: int = 20, *, use_raw: bool = False, layer:
         + labs(x="", y="% of total counts per cell")
         + theme_ggann()
     )
+
+
+def plot_variance_ratio(adata, n_pcs: int = 50, *, key: str = "pca", log: bool = True):
+    """Scree / elbow plot of PCA variance ratio (``sc.pl.pca_variance_ratio``).
+
+    Reads the per-PC variance ratio stored by ``sc.tl.pca`` in
+    ``adata.uns[key]['variance_ratio']`` and draws it as a point-and-line elbow, to
+    help pick how many PCs to keep. ``log=True`` (scanpy's default) puts the y axis
+    on a log scale so the elbow is easier to read.
+    """
+    uns = adata.uns.get(key)
+    if uns is None or "variance_ratio" not in uns:
+        raise KeyError(
+            f"adata.uns['{key}']['variance_ratio'] not found; run sc.tl.pca(adata) first."
+        )
+    vr = np.asarray(uns["variance_ratio"], dtype=float)
+    n = min(n_pcs, vr.size)
+    df = pd.DataFrame({"PC": np.arange(1, n + 1), "variance_ratio": vr[:n]})
+    plot = (
+        ggplot(df, aes("PC", "variance_ratio"))
+        + geom_line(color="#b0b0b0")
+        + geom_point(color="#2166ac", size=1.8)
+        + labs(x="principal component", y="variance ratio")
+        + theme_ggann()
+    )
+    if log:
+        plot = plot + scale_y_log10()
+    return plot
